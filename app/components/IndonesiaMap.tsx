@@ -137,6 +137,13 @@ export function IndonesiaMap() {
 
     const meshes: THREE.Mesh[] = [];
     const textures: THREE.Texture[] = [];
+    const provinceBoundaryMaterial = new THREE.LineBasicMaterial({
+      color: 0x050706,
+      transparent: true,
+      opacity: .98,
+      depthWrite: false,
+      toneMapped: false,
+    });
     const centers = new Map<string, THREE.Vector3>();
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2(20, 20);
@@ -230,6 +237,20 @@ export function IndonesiaMap() {
             textileTop.position.y = style.depth + .052;
             world.add(textileTop);
           }
+          featureRings(feature).forEach((polygon) => {
+            polygon.forEach((ring) => {
+              const points = ring.map((point) => {
+                const projected = project(point);
+                return new THREE.Vector3(projected.x, style.depth + .075, -projected.y);
+              });
+              const outline = new THREE.LineLoop(
+                new THREE.BufferGeometry().setFromPoints(points),
+                provinceBoundaryMaterial,
+              );
+              outline.renderOrder = 5;
+              world.add(outline);
+            });
+          });
           const center = featureCenter(feature);
           centers.set(name, center);
 
@@ -364,6 +385,7 @@ export function IndonesiaMap() {
       renderer.domElement.removeEventListener("click", onClick);
       controls.dispose();
       textures.forEach((texture) => texture.dispose());
+      provinceBoundaryMaterial.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
     };
