@@ -106,7 +106,7 @@ export function SuaraLanding() {
 
         <section id="perjalanan" className="story-section impact-section" aria-labelledby="impact-title">
           <div className="story-photo blok-m-photo" role="img" aria-label="Blok M Hub pada malam hari">
-            <img src="/design/blok-m-impact-reference.jpeg" alt="" />
+            <img src="/design/blok-m-hub-raw.png" alt="" />
             <div className="photo-caption"><span>Blok M, Jakarta Selatan</span><b>Simulasi kebijakan rendah emisi</b></div>
           </div>
           <div className="paper-card impact-card">

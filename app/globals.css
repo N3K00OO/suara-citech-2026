@@ -1116,3 +1116,57 @@ h1, h2, h3, blockquote { font-family: Georgia, "Times New Roman", serif; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Targeted visual repair: raw photography, restrained typography, stable grids */
+@media (min-width: 901px) {
+  .hero-grid { grid-template-columns: 39% 61%; }
+  .landing-hero-copy { padding-right: 3.5vw; padding-left: 5vw; }
+  .landing-hero h1 {
+    max-width: 590px;
+    font-size: clamp(52px, 4.35vw, 78px);
+    letter-spacing: -0.048em;
+    line-height: 0.95;
+  }
+  .impact-section { grid-template-columns: 42% 58%; }
+  .impact-section .story-photo { grid-row: 1; grid-column: 2; min-width: 0; }
+  .impact-card {
+    grid-row: 1;
+    grid-column: 1;
+    align-self: center;
+    margin: 55px -38px 120px 3vw;
+  }
+}
+
+.paper-card h2,
+.revision-heading h2,
+.handoff-section h2 {
+  font-size: clamp(40px, 3.5vw, 58px);
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.story-photo > img,
+.formal-photo-crop img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+}
+.blok-m-photo > img { object-position: 50% 48%; }
+.formal-photo-crop img { object-position: 50% 50%; }
+.formal-card { margin-left: -24px; padding: clamp(38px, 3.2vw, 56px); }
+.formal-card h2 { font-size: clamp(38px, 3vw, 54px); line-height: 1.02; }
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  .hero-grid { grid-template-columns: 42% 58%; }
+  .impact-card { margin-right: -30px; margin-left: 2vw; }
+}
+
+@media (max-width: 900px) {
+  .impact-section .story-photo,
+  .impact-card { grid-row: auto; grid-column: auto; }
+  .blok-m-photo > img { left: 0; object-position: 50% 46%; }
+  .formal-photo-crop img { top: 0; left: 0; object-position: 50% 45%; }
+}

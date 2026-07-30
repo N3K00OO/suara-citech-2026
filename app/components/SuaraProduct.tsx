@@ -387,7 +387,7 @@ function FormalStep({
       />
       <div className="formal-workspace">
         <div className="formal-photo-crop" role="img" aria-label="Warga melintasi genangan di kawasan permukiman">
-          <img src="/design/masukan-formal-reference.png" alt="" />
+          <img src="/design/flood-impact-raw.png" alt="" />
           <span>Pengalaman lapangan · akses dan mobilitas</span>
         </div>
         <form className="formal-form" onSubmit={(event) => { event.preventDefault(); onSubmit(); }}>
