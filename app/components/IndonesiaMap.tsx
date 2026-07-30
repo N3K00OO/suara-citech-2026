@@ -142,12 +142,13 @@ export function IndonesiaMap() {
     const textures: THREE.Texture[] = [];
     const boundaryGeometries: LineGeometry[] = [];
     const provinceBoundaryMaterial = new LineMaterial({
-      color: 0x050706,
-      linewidth: 3,
+      color: 0x111a17,
+      linewidth: 1.35,
       transparent: true,
-      opacity: .98,
+      opacity: .62,
       depthWrite: false,
       toneMapped: false,
+      alphaToCoverage: true,
     });
     provinceBoundaryMaterial.resolution.set(container.clientWidth, container.clientHeight);
     const centers = new Map<string, THREE.Vector3>();
@@ -244,25 +245,27 @@ export function IndonesiaMap() {
             world.add(textileTop);
           }
           featureRings(feature).forEach((polygon) => {
-            polygon.forEach((ring) => {
-              const positions: number[] = [];
-              ring.forEach((point) => {
-                const projected = project(point);
-                positions.push(projected.x, style.depth + .075, -projected.y);
-              });
-              const first = ring[0];
-              if (first) {
-                const projected = project(first);
-                positions.push(projected.x, style.depth + .075, -projected.y);
-              }
-              const outlineGeometry = new LineGeometry();
-              outlineGeometry.setPositions(positions);
-              boundaryGeometries.push(outlineGeometry);
-              const outline = new Line2(outlineGeometry, provinceBoundaryMaterial);
-              outline.computeLineDistances();
-              outline.renderOrder = 5;
-              world.add(outline);
+            const ring = polygon[0];
+            if (!ring || ring.length < 3) return;
+            const projectedRing = ring.map(project);
+            let twiceArea = 0;
+            projectedRing.forEach((point, pointIndex) => {
+              const next = projectedRing[(pointIndex + 1) % projectedRing.length];
+              twiceArea += point.x * next.y - next.x * point.y;
             });
+            if (Math.abs(twiceArea) < .002) return;
+            const positions: number[] = [];
+            projectedRing.forEach((point) => {
+              positions.push(point.x, style.depth + .06, -point.y);
+            });
+            const first = projectedRing[0];
+            positions.push(first.x, style.depth + .06, -first.y);
+            const outlineGeometry = new LineGeometry();
+            outlineGeometry.setPositions(positions);
+            boundaryGeometries.push(outlineGeometry);
+            const outline = new Line2(outlineGeometry, provinceBoundaryMaterial);
+            outline.renderOrder = 5;
+            world.add(outline);
           });
           const center = featureCenter(feature);
           centers.set(name, center);
