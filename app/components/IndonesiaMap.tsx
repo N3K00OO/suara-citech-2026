@@ -218,10 +218,10 @@ export function IndonesiaMap() {
             const textileTop = new THREE.Mesh(
               new THREE.ShapeGeometry(featureRings(feature).map(makeShape)),
               new THREE.MeshBasicMaterial({
-                color: 0xeaf1df,
+                color: 0xffffff,
                 map: textileTexture,
                 transparent: true,
-                opacity: .24,
+                opacity: .68,
                 depthWrite: false,
                 polygonOffset: true,
                 polygonOffsetFactor: -2,
@@ -396,7 +396,7 @@ export function IndonesiaMap() {
         </div>
         <div
           className="fabric-sample"
-          style={{ backgroundImage: `linear-gradient(90deg,rgba(5,23,19,.08),rgba(5,23,19,.72)),url(/textures/provinces/${activeTextureKey}.webp)` }}
+          style={{ backgroundImage: `linear-gradient(90deg,rgba(5,23,19,.03),rgba(5,23,19,.42)),url(/textures/provinces/${activeTextureKey}.webp)` }}
         >
           <span>Tekstil daerah</span>
           <b>{activeTextile.textile}</b>
