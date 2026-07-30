@@ -157,6 +157,37 @@ export function IndonesiaMap() {
     const meshes: THREE.Mesh[] = [];
     const textures: THREE.Texture[] = [];
     const boundaryGeometries: LineGeometry[] = [];
+    const routeGeometries: THREE.BufferGeometry[] = [];
+    const routeCoreMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffcf77,
+      transparent: true,
+      opacity: .76,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const routeGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffaa45,
+      transparent: true,
+      opacity: .12,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const routePulseGeometry = new THREE.SphereGeometry(.052, 14, 14);
+    const routePulseMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffe2a0,
+      transparent: true,
+      opacity: .94,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const routePulses: Array<{
+      mesh: THREE.Mesh;
+      curve: THREE.QuadraticBezierCurve3;
+      offset: number;
+    }> = [];
     const provinceBoundaryMaterial = new LineMaterial({
       color: 0xd1a252,
       linewidth: 1.1,
@@ -342,6 +373,34 @@ export function IndonesiaMap() {
           marker.userData.offset = Math.random() * Math.PI * 2;
           world.add(marker);
         });
+        const routes = [
+          [1, 0],
+          [0, 2],
+          [0, 3],
+          [2, 3],
+          [3, 4],
+        ] as const;
+        routes.forEach(([fromIndex, toIndex], index) => {
+          const from = project(cities[fromIndex]);
+          const to = project(cities[toIndex]);
+          const start = new THREE.Vector3(from.x, .67, -from.y);
+          const end = new THREE.Vector3(to.x, .67, -to.y);
+          const distance = start.distanceTo(end);
+          const control = start.clone().lerp(end, .5);
+          control.y = 1.04 + distance * .09;
+          const curve = new THREE.QuadraticBezierCurve3(start, control, end);
+          const coreGeometry = new THREE.TubeGeometry(curve, 56, .012, 5, false);
+          const glowGeometry = new THREE.TubeGeometry(curve, 56, .04, 6, false);
+          routeGeometries.push(coreGeometry, glowGeometry);
+          world.add(
+            new THREE.Mesh(glowGeometry, routeGlowMaterial),
+            new THREE.Mesh(coreGeometry, routeCoreMaterial),
+          );
+          const pulse = new THREE.Mesh(routePulseGeometry, routePulseMaterial);
+          pulse.position.copy(curve.getPointAt(index / routes.length));
+          world.add(pulse);
+          routePulses.push({ mesh: pulse, curve, offset: index / routes.length });
+        });
         const initial = meshes.some((mesh) => mesh.userData.name === DEFAULT_PROVINCE) ? DEFAULT_PROVINCE : names[0];
         selectProvince(initial, false);
       })
@@ -385,6 +444,11 @@ export function IndonesiaMap() {
       const elapsed = clock.getElapsedTime();
       dust.rotation.y = elapsed * 0.012;
       scanRings.rotation.y = elapsed * -0.006;
+      routePulses.forEach(({ mesh, curve, offset }, index) => {
+        const t = (elapsed * .075 + offset) % 1;
+        mesh.position.copy(curve.getPointAt(t));
+        mesh.scale.setScalar(.82 + Math.sin(elapsed * 5 + index) * .16);
+      });
       world.children.forEach((child) => {
         if (!(child instanceof THREE.Group)) return;
         if (child.userData.provinceMiniature) {
@@ -443,7 +507,12 @@ export function IndonesiaMap() {
       controls.dispose();
       textures.forEach((texture) => texture.dispose());
       boundaryGeometries.forEach((geometry) => geometry.dispose());
+      routeGeometries.forEach((geometry) => geometry.dispose());
       provinceBoundaryMaterial.dispose();
+      routeCoreMaterial.dispose();
+      routeGlowMaterial.dispose();
+      routePulseGeometry.dispose();
+      routePulseMaterial.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
     };
