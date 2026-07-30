@@ -78,7 +78,7 @@ export function IndonesiaMap() {
   );
   const activeStyle = PROVINCE_STYLES[activeProvince] ?? FALLBACK_STYLE;
   const activeTextile = PROVINCE_TEXTILES[activeProvince] ?? FALLBACK_TEXTILE;
-  const activeTextureKey = PROVINCE_TEXTURE_KEYS[activeProvince] ?? "ikat";
+  const activeTextureKey = PROVINCE_TEXTURE_KEYS[activeProvince] ?? "papua";
   const activeAnimalCredit = getProvinceAnimalCredit(activeProvince);
 
   useEffect(() => {
@@ -396,7 +396,7 @@ export function IndonesiaMap() {
         </div>
         <div
           className="fabric-sample"
-          style={{ backgroundImage: `linear-gradient(90deg,rgba(5,23,19,.08),rgba(5,23,19,.72)),url(/textures/library/${activeTextureKey}.jpg)` }}
+          style={{ backgroundImage: `linear-gradient(90deg,rgba(5,23,19,.08),rgba(5,23,19,.72)),url(/textures/provinces/${activeTextureKey}.webp)` }}
         >
           <span>Tekstil daerah</span>
           <b>{activeTextile.textile}</b>

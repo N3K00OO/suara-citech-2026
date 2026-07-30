@@ -46,12 +46,20 @@ export const PROVINCE_TEXTILES: Record<string, ProvinceTextile> = {
 
 export const FALLBACK_TEXTILE: ProvinceTextile = {attire:"Busana adat Nusantara",textile:"tenun lokal",motif:"weave",palette:["#275e4d","#b7d66b","#e8e1b7"]};
 export const PROVINCE_TEXTURE_KEYS: Record<string, string> = {
-  Aceh:"songket", "Sumatera Utara":"ulos", "Sumatera Barat":"songket", Riau:"songket", "Kepulauan Riau":"songket", Jambi:"songket", "Sumatera Selatan":"songket", Bengkulu:"songket", Lampung:"tapis", "Kepulauan Bangka Belitung":"songket",
-  Banten:"ulos", "DKI Jakarta":"songket", "Jawa Barat":"ulos", "Jawa Tengah":"songket", "Daerah Istimewa Yogyakarta":"songket", "Jawa Timur":"tapis",
-  Bali:"bali-songket", "Nusa Tenggara Barat":"bali-songket", "Nusa Tenggara Timur":"ikat",
-  "Kalimantan Barat":"ikat", "Kalimantan Tengah":"ikat", "Kalimantan Selatan":"tapis", "Kalimantan Timur":"ikat", "Kalimantan Utara":"ikat",
-  "Sulawesi Utara":"bali-songket", Gorontalo:"tapis", "Sulawesi Tengah":"ikat", "Sulawesi Barat":"ikat", "Sulawesi Selatan":"songket", "Sulawesi Tenggara":"ikat",
-  Maluku:"ikat", "Maluku Utara":"songket", "Papua Barat":"ikat", "Papua Barat Daya":"ikat", Papua:"ikat", "Papua Tengah":"ikat", "Papua Pegunungan":"ikat", "Papua Selatan":"ikat"
+  Aceh:"aceh", "Sumatera Utara":"sumatera-utara", "Sumatera Barat":"sumatera-barat",
+  Riau:"riau", Jambi:"jambi", "Sumatera Selatan":"sumatera-selatan", Bengkulu:"bengkulu",
+  Lampung:"lampung", "Kepulauan Bangka Belitung":"bangka-belitung", "Kepulauan Riau":"kepulauan-riau",
+  "DKI Jakarta":"dki-jakarta", "Jawa Barat":"jawa-barat", "Jawa Tengah":"jawa-tengah",
+  "Daerah Istimewa Yogyakarta":"di-yogyakarta", "Jawa Timur":"jawa-timur", Banten:"banten",
+  Bali:"bali", "Nusa Tenggara Barat":"nusa-tenggara-barat", "Nusa Tenggara Timur":"nusa-tenggara-timur",
+  "Kalimantan Barat":"kalimantan-barat", "Kalimantan Tengah":"kalimantan-tengah",
+  "Kalimantan Selatan":"kalimantan-selatan", "Kalimantan Timur":"kalimantan-timur",
+  "Kalimantan Utara":"kalimantan-utara", "Sulawesi Utara":"sulawesi-utara",
+  "Sulawesi Tengah":"sulawesi-tengah", "Sulawesi Selatan":"sulawesi-selatan",
+  "Sulawesi Tenggara":"sulawesi-tenggara", Gorontalo:"gorontalo", "Sulawesi Barat":"sulawesi-barat",
+  Maluku:"maluku", "Maluku Utara":"maluku-utara", "Papua Barat":"papua-barat",
+  "Papua Barat Daya":"papua-barat", Papua:"papua", "Papua Tengah":"papua",
+  "Papua Pegunungan":"papua", "Papua Selatan":"papua"
 };
 
 export function createTextileTexture(t: ProvinceTextile, index: number, province: string) {
@@ -70,5 +78,5 @@ export function createTextileTexture(t: ProvinceTextile, index: number, province
   } else {
     c.strokeStyle=ink;c.lineWidth=t.motif==="stripe"?9:3;for(let n=-32;n<160;n+=t.motif==="stripe"?24:12){c.beginPath();if(t.motif==="stripe"){c.moveTo(n,0);c.lineTo(n+42,128);}else{c.moveTo(n,0);c.lineTo(n,128);c.moveTo(0,n);c.lineTo(128,n);}c.stroke();}c.strokeStyle=hi;c.lineWidth=2;for(let n=6;n<128;n+=24){c.beginPath();c.moveTo(0,n);c.lineTo(128,n);c.stroke();}
   }
-  const texture = new THREE.Texture(canvas); texture.needsUpdate=true; const key=PROVINCE_TEXTURE_KEYS[province]??"ikat"; new THREE.ImageLoader().load(`/textures/library/${key}.jpg`, image=>{texture.image=image;texture.needsUpdate=true;}); texture.colorSpace=THREE.SRGBColorSpace; texture.wrapS=texture.wrapT=THREE.RepeatWrapping; texture.repeat.set(.31+(index%3)*.028,.31+(index%2)*.025); texture.rotation=(index%4)*.035; texture.center.set(.5,.5); texture.anisotropy=4; return texture;
+  const texture = new THREE.Texture(canvas); texture.needsUpdate=true; const key=PROVINCE_TEXTURE_KEYS[province]??"papua"; new THREE.ImageLoader().load(`/textures/provinces/${key}.webp`, image=>{texture.image=image;texture.needsUpdate=true;}); texture.colorSpace=THREE.SRGBColorSpace; texture.wrapS=texture.wrapT=THREE.RepeatWrapping; texture.repeat.set(.31+(index%3)*.028,.31+(index%2)*.025); texture.rotation=(index%4)*.035; texture.center.set(.5,.5); texture.anisotropy=4; return texture;
 }

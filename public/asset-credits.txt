@@ -12,22 +12,4 @@ https://poly.pizza/m/9deYXdpoeTC
 Animated Fish Pack (Manta ray) by Quaternius - CC0
 https://quaternius.com/packs/animatedfish.html
 
-Province textile motifs are original procedural illustrations inspired by regional clothing and weaving traditions. They are stylized interpretations, not scans or exact reproductions of ceremonial textiles.
-TEXTILE IMAGE CREDITS - WIKIMEDIA COMMONS
-
-Ulos weaving photo by Nocomentapapun - CC BY-SA 4.0
-https://commons.wikimedia.org/wiki/File:Weaving_ulos_cloth.jpg
-
-Aesan Gede Songket Palembang photo - CC BY-SA 3.0
-https://commons.wikimedia.org/wiki/File:Aesan_Gede_Songket_Palembang.jpg
-
-Kain Tapis photo by Midori - CC BY-SA 3.0 / CC BY 2.5
-https://commons.wikimedia.org/wiki/File:Kain_tapis.JPG
-
-Balinese Songket photo by Chris Hazzard - CC BY-SA 3.0
-https://commons.wikimedia.org/wiki/File:Songket,_Woven_on_backstrap_and_Joined_170_X_88cm_20121207_4.JPG
-
-Tenun Ikat photo by Fiona Valerie Muskananfola - CC BY-SA 4.0
-https://commons.wikimedia.org/wiki/File:Tenun_Ikat.jpg
-
-Images are cropped and repeated as 3D terrain textures. Province-specific labels identify the intended local clothing tradition; where a directly reusable province-specific image was unavailable, the closest regional textile image is used as a visual fallback.
+Province textile textures supplied by the project owner.
