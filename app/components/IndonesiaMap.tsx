@@ -220,7 +220,7 @@ export function IndonesiaMap() {
                 color: 0xffffff,
                 map: textileTexture,
                 transparent: true,
-                opacity: .69,
+                opacity: .72,
                 depthWrite: false,
                 polygonOffset: true,
                 polygonOffsetFactor: -2,
