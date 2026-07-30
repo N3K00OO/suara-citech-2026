@@ -81,13 +81,12 @@ export function createTextileTexture(province: string, onColor?: (color: THREE.C
       samples += 1;
     }
     if (!samples) return;
-    const color = new THREE.Color().setRGB(
-      red / samples / 255,
-      green / samples / 255,
-      blue / samples / 255,
-      THREE.SRGBColorSpace,
+    const color = new THREE.Color(
+      `rgb(${Math.round(red / samples)}, ${Math.round(green / samples)}, ${Math.round(blue / samples)})`,
     );
-    color.offsetHSL(0, 0, -.07);
+    const hsl = { h: 0, s: 0, l: 0 };
+    color.getHSL(hsl);
+    color.setHSL(hsl.h, Math.max(hsl.s, .28), THREE.MathUtils.clamp(hsl.l, .34, .56));
     onColor(color);
   });
   texture.colorSpace = THREE.SRGBColorSpace;
