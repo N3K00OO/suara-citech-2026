@@ -3,6 +3,9 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { Line2 } from "three/examples/jsm/lines/Line2.js";
+import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { FALLBACK_STYLE, PROVINCE_STYLES, type ProvinceStyle } from "../provinceStyles";
 import { createProvinceMiniature } from "../provinceMiniatures";
 import { createTextileTexture } from "../provinceTextiles";
@@ -137,13 +140,16 @@ export function IndonesiaMap() {
 
     const meshes: THREE.Mesh[] = [];
     const textures: THREE.Texture[] = [];
-    const provinceBoundaryMaterial = new THREE.LineBasicMaterial({
+    const boundaryGeometries: LineGeometry[] = [];
+    const provinceBoundaryMaterial = new LineMaterial({
       color: 0x050706,
+      linewidth: 3,
       transparent: true,
       opacity: .98,
       depthWrite: false,
       toneMapped: false,
     });
+    provinceBoundaryMaterial.resolution.set(container.clientWidth, container.clientHeight);
     const centers = new Map<string, THREE.Vector3>();
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2(20, 20);
@@ -239,14 +245,21 @@ export function IndonesiaMap() {
           }
           featureRings(feature).forEach((polygon) => {
             polygon.forEach((ring) => {
-              const points = ring.map((point) => {
+              const positions: number[] = [];
+              ring.forEach((point) => {
                 const projected = project(point);
-                return new THREE.Vector3(projected.x, style.depth + .075, -projected.y);
+                positions.push(projected.x, style.depth + .075, -projected.y);
               });
-              const outline = new THREE.LineLoop(
-                new THREE.BufferGeometry().setFromPoints(points),
-                provinceBoundaryMaterial,
-              );
+              const first = ring[0];
+              if (first) {
+                const projected = project(first);
+                positions.push(projected.x, style.depth + .075, -projected.y);
+              }
+              const outlineGeometry = new LineGeometry();
+              outlineGeometry.setPositions(positions);
+              boundaryGeometries.push(outlineGeometry);
+              const outline = new Line2(outlineGeometry, provinceBoundaryMaterial);
+              outline.computeLineDistances();
               outline.renderOrder = 5;
               world.add(outline);
             });
@@ -370,6 +383,7 @@ export function IndonesiaMap() {
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
+      provinceBoundaryMaterial.resolution.set(container.clientWidth, container.clientHeight);
     };
     window.addEventListener("resize", handleResize);
     return () => {
@@ -385,6 +399,7 @@ export function IndonesiaMap() {
       renderer.domElement.removeEventListener("click", onClick);
       controls.dispose();
       textures.forEach((texture) => texture.dispose());
+      boundaryGeometries.forEach((geometry) => geometry.dispose());
       provinceBoundaryMaterial.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
