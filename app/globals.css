@@ -35,7 +35,7 @@ h1 span { display:block; margin-top:18px; color:var(--acid); font-family:Georgia
 .island-nav button { display:grid; grid-template-columns:25px 1fr; align-items:center; width:116px; padding:10px 4px; border:0; border-bottom:1px solid rgba(218,237,211,.13); background:transparent; color:#70877b; cursor:pointer; text-align:left; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; transition:180ms ease; }
 .island-nav button span { font-family:Georgia,serif; font-size:9px; font-style:italic; font-weight:400; }
 .island-nav button:hover,.island-nav button.active { border-color:var(--acid); color:var(--acid); transform:translateX(-6px); }
-.province-card { position:absolute; z-index:4; right:3vw; bottom:72px; width:220px; padding:17px; border:1px solid rgba(220,239,211,.12); background:var(--panel); backdrop-filter:blur(14px); animation:reveal-up .9s .3s ease both; }
+.province-card { --province-accent:#ddea68; position:absolute; z-index:4; right:3vw; bottom:64px; width:280px; padding:18px; border:1px solid rgba(220,239,211,.12); background:var(--panel); backdrop-filter:blur(14px); animation:reveal-up .9s .3s ease both; }
 .province-meta { display:flex; justify-content:space-between; color:#789084; font-size:8px; letter-spacing:.12em; text-transform:uppercase; }
 .province-card strong { display:block; min-height:48px; margin:10px 0 5px; color:var(--acid); font-family:Georgia,serif; font-size:20px; font-style:italic; font-weight:400; line-height:1.1; }
 .province-card label { display:block; margin:8px 0 5px; color:#789084; font-size:8px; letter-spacing:.1em; text-transform:uppercase; }
@@ -78,3 +78,25 @@ h1 span { display:block; margin-top:18px; color:var(--acid); font-family:Georgia
 }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; } }
 
+
+
+.province-card { border-top:2px solid var(--province-accent); box-shadow:0 24px 70px rgba(0,0,0,.28),0 0 34px color-mix(in srgb,var(--province-accent) 10%,transparent); max-height:calc(100dvh - 145px); overflow:auto; scrollbar-width:thin; scrollbar-color:var(--province-accent) transparent; }
+.province-heading { display:flex; align-items:flex-start; gap:10px; }
+.province-swatch { flex:0 0 auto; width:8px; height:28px; margin-top:11px; border-radius:999px; background:var(--province-accent); box-shadow:0 0 18px var(--province-accent); }
+.province-heading strong { min-height:0; margin:9px 0 10px; color:var(--province-accent); }
+.signature-block { padding:12px 0 13px; border-top:1px solid rgba(220,239,211,.11); border-bottom:1px solid rgba(220,239,211,.11); }
+.category-pill { display:inline-flex; padding:4px 7px; border:1px solid color-mix(in srgb,var(--province-accent) 45%,transparent); border-radius:999px; color:var(--province-accent); font-size:7px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+.signature-block h2 { margin:9px 0 5px; color:#edf3e7; font-family:Georgia,serif; font-size:17px; font-style:italic; font-weight:400; }
+.signature-block p { margin:0; color:#8fa398; font-size:9px; line-height:1.55; }
+.identity-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin:10px 0; }
+.identity-grid div { min-width:0; padding:8px; background:rgba(255,255,255,.035); border:1px solid rgba(220,239,211,.07); }
+.identity-grid span { display:block; margin-bottom:4px; color:#6f887b; font-size:7px; letter-spacing:.12em; text-transform:uppercase; }
+.identity-grid b { display:block; overflow:hidden; color:#cfddd3; font-size:9px; font-weight:600; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }
+@media (max-width:900px) { .province-card { width:230px; bottom:118px; max-height:47dvh; } }
+@media (max-width:600px) { .province-card { right:10px; bottom:116px; width:184px; max-height:42dvh; padding:11px; } .signature-block { padding:8px 0; } .signature-block h2 { margin:6px 0 3px; font-size:14px; } .signature-block p { font-size:8px; } .identity-grid { gap:4px; margin:7px 0; } .identity-grid div { padding:6px; } .identity-grid b { font-size:8px; } }
+
+.identity-grid small { display:block; margin-top:3px; overflow:hidden; color:#789084; font-size:7px; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }
+.asset-credit { border-color:color-mix(in srgb,var(--province-accent) 28%,transparent)!important; background:color-mix(in srgb,var(--province-accent) 7%,transparent)!important; }
+.map-footer a { margin-left:auto; color:#8ba497; text-decoration:none; transition:color 160ms ease; }
+.map-footer a:hover { color:var(--acid); }
+@media (max-width:900px) { .map-footer a { display:none; } }

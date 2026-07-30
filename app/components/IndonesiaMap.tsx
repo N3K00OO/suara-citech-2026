@@ -1,8 +1,12 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { FALLBACK_STYLE, PROVINCE_STYLES, type ProvinceStyle } from "../provinceStyles";
+import { createProvinceMiniature } from "../provinceMiniatures";
+import { createTextileTexture, FALLBACK_TEXTILE, PROVINCE_TEXTILES } from "../provinceTextiles";
+import { getProvinceAnimalCredit, loadProvinceAnimal } from "../provinceAnimals";
 
 type Position = [number, number];
 type ProvinceFeature = {
@@ -72,6 +76,9 @@ export function IndonesiaMap() {
     () => Math.max(0, provinceNames.indexOf(activeProvince)),
     [activeProvince, provinceNames],
   );
+  const activeStyle = PROVINCE_STYLES[activeProvince] ?? FALLBACK_STYLE;
+  const activeTextile = PROVINCE_TEXTILES[activeProvince] ?? FALLBACK_TEXTILE;
+  const activeAnimalCredit = getProvinceAnimalCredit(activeProvince);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -144,6 +151,7 @@ export function IndonesiaMap() {
     scene.add(dust);
 
     const meshes: THREE.Mesh[] = [];
+    const textures: THREE.Texture[] = [];
     const centers = new Map<string, THREE.Vector3>();
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2(20, 20);
@@ -152,16 +160,14 @@ export function IndonesiaMap() {
     let targetCamera = camera.position.clone();
     let targetLookAt = controls.target.clone();
     let disposed = false;
-    const baseMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x78b95f, roughness: 0.58, metalness: 0.04,
-      clearcoat: 0.3, emissive: 0x0b2d20, emissiveIntensity: 0.35,
-    });
     const resetMaterial = (mesh: THREE.Mesh | null) => {
       if (!mesh) return;
       const material = mesh.material as THREE.MeshPhysicalMaterial;
-      material.color.set(mesh === selected ? 0xe9d96b : 0x78b95f);
-      material.emissive.set(mesh === selected ? 0x625d16 : 0x0b2d20);
-      material.emissiveIntensity = mesh === selected ? 0.62 : 0.35;
+      const style = (mesh.userData.style as ProvinceStyle) ?? FALLBACK_STYLE;
+      material.color.set(mesh === selected ? 0xfff0bf : 0xffffff);
+      material.emissive.set(style.emissive);
+      material.emissiveIntensity = mesh === selected ? 0.9 : 0.34;
+      material.clearcoat = mesh === selected ? 0.8 : 0.35;
     };
     const selectProvince = (name: string, moveCamera = true) => {
       const mesh = meshes.find((item) => item.userData.name === name);
@@ -184,23 +190,52 @@ export function IndonesiaMap() {
         const names = data.features.map((f) => f.properties.PROVINSI).sort((a, b) => a.localeCompare(b, "id"));
         setProvinceNames(names);
         data.features.forEach((feature, index) => {
+          const name = feature.properties.PROVINSI;
+          const style = PROVINCE_STYLES[name] ?? FALLBACK_STYLE;
           const geometry = new THREE.ExtrudeGeometry(featureRings(feature).map(makeShape), {
-            depth: 0.33, bevelEnabled: true, bevelSize: 0.035,
+            depth: style.depth, bevelEnabled: true, bevelSize: 0.035,
             bevelThickness: 0.045, bevelSegments: 2, curveSegments: 2,
           });
           geometry.rotateX(-Math.PI / 2);
-          const material = baseMaterial.clone();
-          material.color.offsetHSL((index % 6) * 0.006, 0, (index % 4) * 0.012);
+          const textile = PROVINCE_TEXTILES[name] ?? FALLBACK_TEXTILE;
+          const textileTexture = createTextileTexture(textile, index);
+          if (textileTexture) textures.push(textileTexture);
+          const material = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            map: textileTexture,
+            roughness: style.category === "Bahari" ? .38 : .7,
+            metalness: style.category === "Kota" ? .3 : .06,
+            clearcoat: .35,
+            emissive: style.emissive,
+            emissiveIntensity: .34,
+          });
           const mesh = new THREE.Mesh(geometry, material);
-          mesh.userData.name = feature.properties.PROVINSI;
+          mesh.userData.name = name;
+          mesh.userData.style = style;
           world.add(mesh);
           meshes.push(mesh);
-          centers.set(feature.properties.PROVINSI, featureCenter(feature));
+          const center = featureCenter(feature);
+          centers.set(name, center);
+
+          const miniature = createProvinceMiniature(style);
+          miniature.position.set(center.x, style.depth + .055, center.z);
+          miniature.scale.multiplyScalar(name === "DKI Jakarta" ? .72 : .9 + (index % 3) * .06);
+          miniature.userData.provinceMiniature = true;
+          miniature.userData.baseY = style.depth + .055;
+          miniature.userData.offset = index * .47;
+          miniature.traverse((child) => { child.userData.provinceName = name; });
+          world.add(miniature);
+          loadProvinceAnimal(name).then((animal) => {
+            if (!animal || disposed) return;
+            animal.userData.provinceAnimal = true;
+            miniature.add(animal);
+          }).catch(() => undefined);
+
           const edges = new THREE.LineSegments(
             new THREE.EdgesGeometry(geometry, 14),
-            new THREE.LineBasicMaterial({ color: 0xd6f3a8, transparent: true, opacity: 0.38 }),
+            new THREE.LineBasicMaterial({ color: style.accent, transparent: true, opacity: .52 }),
           );
-          edges.position.y = 0.006;
+          edges.position.y = .006;
           world.add(edges);
         });
         cities.forEach((city) => {
@@ -244,9 +279,13 @@ export function IndonesiaMap() {
       dust.rotation.y = elapsed * 0.012;
       scanRings.rotation.y = elapsed * -0.006;
       world.children.forEach((child) => {
-        if (child instanceof THREE.Group && child.userData.offset !== undefined) {
-          const pulse = 1 + Math.sin(elapsed * 2.2 + child.userData.offset) * 0.24;
-          child.children[1].scale.setScalar(pulse);
+        if (!(child instanceof THREE.Group)) return;
+        if (child.userData.provinceMiniature) {
+          child.position.y = child.userData.baseY + Math.sin(elapsed * 1.2 + child.userData.offset) * .014;
+          child.rotation.y = Math.sin(elapsed * .55 + child.userData.offset) * .08;
+        } else if (child.userData.offset !== undefined) {
+          const pulse = 1 + Math.sin(elapsed * 2.2 + child.userData.offset) * .24;
+          child.children[1]?.scale.setScalar(pulse);
         }
       });
       raycaster.setFromCamera(pointer, camera);
@@ -256,9 +295,10 @@ export function IndonesiaMap() {
         hovered = hit || null;
         if (hovered && hovered !== selected) {
           const material = hovered.material as THREE.MeshPhysicalMaterial;
-          material.color.set(0xbddf5b);
-          material.emissive.set(0x365b19);
-          material.emissiveIntensity = 0.7;
+          const style = (hovered.userData.style as ProvinceStyle) ?? FALLBACK_STYLE;
+          material.color.set(0xffedb0);
+          material.emissive.set(style.emissive);
+          material.emissiveIntensity = .78;
         }
         renderer.domElement.style.cursor = hovered ? "pointer" : "grab";
       }
@@ -290,6 +330,7 @@ export function IndonesiaMap() {
       renderer.domElement.removeEventListener("pointerleave", onPointerLeave);
       renderer.domElement.removeEventListener("click", onClick);
       controls.dispose();
+      textures.forEach((texture) => texture.dispose());
       renderer.dispose();
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
     };
@@ -311,7 +352,7 @@ export function IndonesiaMap() {
       <aside className="hero-panel">
         <p className="eyebrow">05° LU — 11° LS</p>
         <h1>Jelajahi<span>Nusantara</span></h1>
-        <p className="hero-copy">Sebuah atlas hidup tentang negeri kepulauan terbesar di dunia. Putar, perbesar, dan pilih provinsi untuk memulai perjalanan.</p>
+        <p className="hero-copy">Setiap provinsi kini punya diorama hidup: rumah adat, bentang alam, budaya, dan cita rasa yang berbeda.</p>
         <div className="hero-actions">
           <button className="primary-button" type="button" onClick={() => api.current?.focus(presets[0].target, presets[0].camera)}>
             Lihat seluruh kepulauan <span>?</span>
@@ -328,16 +369,27 @@ export function IndonesiaMap() {
           }}><span>0{index + 1}</span>{preset.label}</button>
         ))}
       </nav>
-      <div className="province-card">
+      <div className="province-card" style={{ "--province-accent": "#" + activeStyle.accent.toString(16).padStart(6, "0") } as React.CSSProperties}>
         <div className="province-meta"><span>Provinsi terpilih</span><span>{String(activeIndex + 1).padStart(2, "0")} / 38</span></div>
-        <strong>{activeProvince}</strong>
-        <label htmlFor="province-select">Lompat ke provinsi</label>
+        <div className="province-heading"><span className="province-swatch" /><strong>{activeProvince}</strong></div>
+        <div className="signature-block">
+          <span className="category-pill">{activeStyle.category}</span>
+          <h2>{activeStyle.signature}</h2>
+          <p>{activeStyle.detail}</p>
+        </div>
+        <div className="identity-grid">
+          <div><span>Busana adat</span><b>{activeTextile.attire}</b><small>{activeTextile.textile}</small></div>
+          <div><span>Kuliner</span><b>{activeStyle.food}</b></div>
+          <div><span>Warisan</span><b>{activeStyle.culture}</b></div>
+          {activeAnimalCredit && <div className="asset-credit"><span>Fauna 3D</span><b>{activeAnimalCredit.label}</b><small>{activeAnimalCredit.license} · {activeAnimalCredit.creator}</small></div>}
+        </div>
+        <label htmlFor="province-select">Jelajahi provinsi lain</label>
         <select id="province-select" value={activeProvince} onChange={(event) => api.current?.select(event.target.value)}>
           {provinceNames.map((province) => <option value={province} key={province}>{province}</option>)}
         </select>
       </div>
       <div className={loading ? "loading-state visible" : "loading-state"} aria-live="polite"><span />Membentuk kepulauan…</div>
-      <footer className="map-footer"><span>38 provinsi</span><span>±17.000 pulau</span><span>Data wilayah Indonesia</span></footer>
+      <footer className="map-footer"><span>38 tekstur busana adat</span><span>Rumah • budaya • fauna berlisensi</span><a href="/asset-credits.txt" target="_blank" rel="noreferrer">Kredit aset</a></footer>
     </section>
   );
 }
