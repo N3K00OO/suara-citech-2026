@@ -45,8 +45,16 @@ export const PROVINCE_TEXTILES: Record<string, ProvinceTextile> = {
 };
 
 export const FALLBACK_TEXTILE: ProvinceTextile = {attire:"Busana adat Nusantara",textile:"tenun lokal",motif:"weave",palette:["#275e4d","#b7d66b","#e8e1b7"]};
+export const PROVINCE_TEXTURE_KEYS: Record<string, string> = {
+  Aceh:"songket", "Sumatera Utara":"ulos", "Sumatera Barat":"songket", Riau:"songket", "Kepulauan Riau":"songket", Jambi:"songket", "Sumatera Selatan":"songket", Bengkulu:"songket", Lampung:"tapis", "Kepulauan Bangka Belitung":"songket",
+  Banten:"ulos", "DKI Jakarta":"songket", "Jawa Barat":"ulos", "Jawa Tengah":"songket", "Daerah Istimewa Yogyakarta":"songket", "Jawa Timur":"tapis",
+  Bali:"bali-songket", "Nusa Tenggara Barat":"bali-songket", "Nusa Tenggara Timur":"ikat",
+  "Kalimantan Barat":"ikat", "Kalimantan Tengah":"ikat", "Kalimantan Selatan":"tapis", "Kalimantan Timur":"ikat", "Kalimantan Utara":"ikat",
+  "Sulawesi Utara":"bali-songket", Gorontalo:"tapis", "Sulawesi Tengah":"ikat", "Sulawesi Barat":"ikat", "Sulawesi Selatan":"songket", "Sulawesi Tenggara":"ikat",
+  Maluku:"ikat", "Maluku Utara":"songket", "Papua Barat":"ikat", "Papua Barat Daya":"ikat", Papua:"ikat", "Papua Tengah":"ikat", "Papua Pegunungan":"ikat", "Papua Selatan":"ikat"
+};
 
-export function createTextileTexture(t: ProvinceTextile, index: number) {
+export function createTextileTexture(t: ProvinceTextile, index: number, province: string) {
   const canvas = document.createElement("canvas"); canvas.width = canvas.height = 128;
   const c = canvas.getContext("2d"); if (!c) return null;
   const [base, ink, hi] = t.palette; c.fillStyle = base; c.fillRect(0,0,128,128); c.lineCap="round"; c.lineJoin="round";
@@ -62,5 +70,5 @@ export function createTextileTexture(t: ProvinceTextile, index: number) {
   } else {
     c.strokeStyle=ink;c.lineWidth=t.motif==="stripe"?9:3;for(let n=-32;n<160;n+=t.motif==="stripe"?24:12){c.beginPath();if(t.motif==="stripe"){c.moveTo(n,0);c.lineTo(n+42,128);}else{c.moveTo(n,0);c.lineTo(n,128);c.moveTo(0,n);c.lineTo(128,n);}c.stroke();}c.strokeStyle=hi;c.lineWidth=2;for(let n=6;n<128;n+=24){c.beginPath();c.moveTo(0,n);c.lineTo(128,n);c.stroke();}
   }
-  const texture = new THREE.CanvasTexture(canvas); texture.colorSpace=THREE.SRGBColorSpace; texture.wrapS=texture.wrapT=THREE.RepeatWrapping; texture.repeat.set(2.2+(index%3)*.25,2.2+(index%2)*.3); texture.rotation=(index%4)*.06; texture.center.set(.5,.5); texture.anisotropy=4; return texture;
+  const texture = new THREE.Texture(canvas); texture.needsUpdate=true; const key=PROVINCE_TEXTURE_KEYS[province]??"ikat"; new THREE.ImageLoader().load(`/textures/library/${key}.jpg`, image=>{texture.image=image;texture.needsUpdate=true;}); texture.colorSpace=THREE.SRGBColorSpace; texture.wrapS=texture.wrapT=THREE.RepeatWrapping; texture.repeat.set(.14+(index%3)*.018,.14+(index%2)*.02); texture.rotation=(index%4)*.035; texture.center.set(.5,.5); texture.anisotropy=4; return texture;
 }

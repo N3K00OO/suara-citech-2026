@@ -198,7 +198,7 @@ export function IndonesiaMap() {
           });
           geometry.rotateX(-Math.PI / 2);
           const textile = PROVINCE_TEXTILES[name] ?? FALLBACK_TEXTILE;
-          const textileTexture = createTextileTexture(textile, index);
+          const textileTexture = createTextileTexture(textile, index, name);
           if (textileTexture) textures.push(textileTexture);
           const material = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
