@@ -86,7 +86,7 @@ export function createTextileTexture(province: string, onColor?: (color: THREE.C
     );
     const hsl = { h: 0, s: 0, l: 0 };
     color.getHSL(hsl);
-    color.setHSL(hsl.h, Math.max(hsl.s, .28), THREE.MathUtils.clamp(hsl.l, .34, .56));
+    color.setHSL(hsl.h, Math.max(hsl.s, .28), THREE.MathUtils.clamp(hsl.l * .78, .26, .46));
     onColor(color);
   });
   texture.colorSpace = THREE.SRGBColorSpace;
