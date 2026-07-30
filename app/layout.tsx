@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 
@@ -7,21 +7,27 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = requestHeaders.get("x-forwarded-host") || requestHeaders.get("host") || "localhost:3000";
   const protocol = requestHeaders.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
+
   return {
     metadataBase: new URL(origin),
-    title: "Tanah Air — Atlas 3D Indonesia",
-    description: "Jelajahi 38 provinsi Indonesia melalui peta kepulauan 3D yang interaktif.",
+    title: {
+      default: "SUARA — Catatan Kebijakan Publik",
+      template: "%s · SUARA",
+    },
+    description:
+      "Ikuti pengalaman warga menjadi masukan formal, pertimbangan lembaga, dan perubahan kebijakan yang dapat diperiksa.",
     openGraph: {
-      title: "Tanah Air — Atlas 3D Indonesia",
-      description: "Putar, perbesar, dan jelajahi Nusantara dalam tiga dimensi.",
-      images: [{ url: `${origin}/og.png`, width: 1672, height: 941, alt: "Peta relief Indonesia dengan judul Jelajahi Nusantara" }],
+      title: "SUARA — Ikuti satu suara sampai kebijakan berubah",
+      description:
+        "Prototipe konsultasi kebijakan publik yang menelusuri dampak, masukan, musyawarah, keputusan, dan revisi.",
+      images: [{ url: `${origin}/og.png`, width: 1586, height: 992, alt: "SUARA dengan peta 3D Nusantara" }],
       type: "website",
       locale: "id_ID",
     },
     twitter: {
       card: "summary_large_image",
-      title: "Tanah Air — Atlas 3D Indonesia",
-      description: "Putar, perbesar, dan jelajahi Nusantara dalam tiga dimensi.",
+      title: "SUARA — Catatan Kebijakan Publik",
+      description: "Satu kebijakan. Banyak kehidupan.",
       images: [`${origin}/og.png`],
     },
   };
@@ -34,4 +40,3 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
-

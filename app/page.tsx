@@ -1,10 +1,10 @@
-﻿import { IndonesiaMap } from "./components/IndonesiaMap";
+import type { Metadata } from "next";
+import { SuaraLanding } from "./components/SuaraLanding";
+
+export const metadata: Metadata = {
+  title: "Ikuti satu suara",
+};
 
 export default function Home() {
-  return (
-    <main className="site-shell">
-      <IndonesiaMap />
-    </main>
-  );
+  return <SuaraLanding />;
 }
-
