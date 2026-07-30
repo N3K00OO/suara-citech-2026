@@ -7,7 +7,8 @@ body { color:var(--ink); font-family:"Avenir Next","Segoe UI",sans-serif; }
 button,select { font:inherit; }
 button,a,select { -webkit-tap-highlight-color:transparent; }
 .site-shell,.map-experience { width:100vw; height:100dvh; }
-.map-experience { position:relative; isolation:isolate; overflow:hidden; background:radial-gradient(circle at 61% 44%,rgba(35,112,79,.18),transparent 36%),linear-gradient(142deg,#071a17 0%,#04110f 72%); }
+.map-experience { position:relative; isolation:isolate; overflow:hidden; background:radial-gradient(circle at 62% 42%,rgba(22,102,75,.24),transparent 40%),radial-gradient(circle at 16% 46%,rgba(110,64,29,.18),transparent 38%),linear-gradient(142deg,#081813 0%,#020b09 78%); }
+.map-experience::after { content:""; position:absolute; inset:0; z-index:2; pointer-events:none; background:linear-gradient(90deg,rgba(3,7,5,.2),transparent 28%,transparent 76%,rgba(1,5,4,.18)); box-shadow:inset 0 0 150px rgba(0,0,0,.58); }
 .map-stage { position:absolute; inset:0; }
 .map-stage canvas { width:100%; height:100%; outline:none; }
 .map-stage canvas:focus-visible { box-shadow:inset 0 0 0 2px var(--acid); }

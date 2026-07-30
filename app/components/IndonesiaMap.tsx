@@ -74,8 +74,10 @@ export function IndonesiaMap() {
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
-    renderer.domElement.setAttribute("aria-label", "Peta 3D interaktif 38 provinsi Indonesia. Seret untuk memutar dan gulir untuk memperbesar.");
+    renderer.toneMappingExposure = .94;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.domElement.setAttribute("aria-label", "Peta 3D interaktif 38 provinsi Indonesia. Seret untuk menggeser, klik kanan untuk memutar, dan gulir untuk memperbesar.");
     renderer.domElement.tabIndex = 0;
     container.appendChild(renderer.domElement);
 
@@ -96,13 +98,26 @@ export function IndonesiaMap() {
     const world = new THREE.Group();
     world.rotation.y = -0.025;
     scene.add(world);
-    scene.add(new THREE.HemisphereLight(0xc5ffe2, 0x09221d, 2.3));
-    const sun = new THREE.DirectionalLight(0xfff1bd, 4.2);
-    sun.position.set(-8, 18, 11);
-    scene.add(sun);
-    const rim = new THREE.DirectionalLight(0x55ffc4, 2.1);
-    rim.position.set(13, 8, -10);
+    scene.add(new THREE.HemisphereLight(0xb8e9ce, 0x04100d, .78));
+    const sun = new THREE.DirectionalLight(0xffcf82, 5.4);
+    sun.position.set(-10, 18, 9);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 55;
+    sun.shadow.camera.left = -25;
+    sun.shadow.camera.right = 25;
+    sun.shadow.camera.top = 18;
+    sun.shadow.camera.bottom = -18;
+    sun.shadow.bias = -.00045;
+    sun.shadow.normalBias = .025;
+    scene.add(sun, sun.target);
+    const rim = new THREE.DirectionalLight(0x57d7aa, 2.35);
+    rim.position.set(14, 9, -12);
     scene.add(rim);
+    const warmFill = new THREE.PointLight(0xd47a32, 2.2, 30, 2);
+    warmFill.position.set(-12, 7, 7);
+    scene.add(warmFill);
 
     const ocean = new THREE.Mesh(
       new THREE.CircleGeometry(27, 96),
@@ -110,6 +125,7 @@ export function IndonesiaMap() {
     );
     ocean.rotation.x = -Math.PI / 2;
     ocean.position.y = -0.07;
+    ocean.receiveShadow = true;
     world.add(ocean);
 
     const scanRings = new THREE.Group();
@@ -142,10 +158,10 @@ export function IndonesiaMap() {
     const textures: THREE.Texture[] = [];
     const boundaryGeometries: LineGeometry[] = [];
     const provinceBoundaryMaterial = new LineMaterial({
-      color: 0x111a17,
-      linewidth: 1.35,
+      color: 0xd1a252,
+      linewidth: 1.1,
       transparent: true,
-      opacity: .62,
+      opacity: .68,
       depthWrite: false,
       toneMapped: false,
       alphaToCoverage: true,
@@ -178,8 +194,8 @@ export function IndonesiaMap() {
       material.color.copy(baseColor);
       if (mesh === selected) material.color.offsetHSL(0, .03, .1);
       material.emissive.copy(baseColor);
-      material.emissiveIntensity = mesh === selected ? .46 : .18;
-      material.clearcoat = mesh === selected ? .8 : .35;
+      material.emissiveIntensity = mesh === selected ? .22 : .06;
+      material.clearcoat = mesh === selected ? .68 : .28;
     };
     const selectProvince = (name: string, moveCamera = true) => {
       const mesh = meshes.find((item) => item.userData.name === name);
@@ -210,13 +226,15 @@ export function IndonesiaMap() {
           geometry.rotateX(-Math.PI / 2);
           const material = new THREE.MeshPhysicalMaterial({
             color: style.color,
-            roughness: style.category === "Bahari" ? .42 : .72,
-            metalness: style.category === "Kota" ? .3 : .06,
-            clearcoat: .35,
+            roughness: style.category === "Bahari" ? .46 : .62,
+            metalness: style.category === "Kota" ? .14 : .025,
+            clearcoat: .28,
             emissive: style.emissive,
-            emissiveIntensity: .18,
+            emissiveIntensity: .06,
           });
           const mesh = new THREE.Mesh(geometry, material);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
           mesh.userData.name = name;
           mesh.userData.style = style;
           world.add(mesh);
@@ -230,11 +248,13 @@ export function IndonesiaMap() {
           if (textileTexture) {
             const textileTop = new THREE.Mesh(
               new THREE.ShapeGeometry(featureRings(feature).map(makeShape)),
-              new THREE.MeshBasicMaterial({
+              new THREE.MeshStandardMaterial({
                 color: 0xffffff,
                 map: textileTexture,
                 transparent: true,
                 opacity: .72,
+                roughness: .82,
+                metalness: .015,
                 depthWrite: false,
                 polygonOffset: true,
                 polygonOffsetFactor: -2,
@@ -242,6 +262,7 @@ export function IndonesiaMap() {
             );
             textileTop.geometry.rotateX(-Math.PI / 2);
             textileTop.position.y = style.depth + .052;
+            textileTop.receiveShadow = true;
             world.add(textileTop);
           }
           featureRings(feature).forEach((polygon) => {
@@ -276,17 +297,29 @@ export function IndonesiaMap() {
           miniature.userData.provinceMiniature = true;
           miniature.userData.baseY = style.depth + .055;
           miniature.userData.offset = index * .47;
-          miniature.traverse((child) => { child.userData.provinceName = name; });
+          miniature.traverse((child) => {
+            child.userData.provinceName = name;
+            if (child instanceof THREE.Mesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
           world.add(miniature);
           loadProvinceAnimal(name).then((animal) => {
             if (!animal || disposed) return;
             animal.userData.provinceAnimal = true;
+            animal.traverse((child) => {
+              if (child instanceof THREE.Mesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+              }
+            });
             miniature.add(animal);
           }).catch(() => undefined);
 
           const edges = new THREE.LineSegments(
             new THREE.EdgesGeometry(geometry, 14),
-            new THREE.LineBasicMaterial({ color: style.accent, transparent: true, opacity: .52 }),
+            new THREE.LineBasicMaterial({ color: 0xd8ae63, transparent: true, opacity: .48, toneMapped: false }),
           );
           edges.position.y = .006;
           world.add(edges);
@@ -295,10 +328,17 @@ export function IndonesiaMap() {
           const p = project(city);
           const marker = new THREE.Group();
           marker.position.set(p.x, 0.4, -p.y);
-          const core = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffe566 }));
-          const halo = new THREE.Mesh(new THREE.RingGeometry(0.13, 0.16, 28), new THREE.MeshBasicMaterial({ color: 0xffe566, transparent: true, opacity: 0.65, side: THREE.DoubleSide }));
+          const core = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffd47b, toneMapped: false }));
+          const halo = new THREE.Mesh(new THREE.RingGeometry(0.13, 0.16, 28), new THREE.MeshBasicMaterial({ color: 0xffc762, transparent: true, opacity: 0.58, side: THREE.DoubleSide, toneMapped: false }));
+          const beam = new THREE.Mesh(
+            new THREE.CylinderGeometry(.009, .009, .78, 8),
+            new THREE.MeshBasicMaterial({ color: 0xffca69, transparent: true, opacity: .54, toneMapped: false }),
+          );
+          beam.position.y = .4;
+          const markerLight = new THREE.PointLight(0xffb854, 1.8, 2.6, 2);
+          markerLight.position.y = .18;
           halo.rotation.x = -Math.PI / 2;
-          marker.add(core, halo);
+          marker.add(core, halo, beam, markerLight);
           marker.userData.offset = Math.random() * Math.PI * 2;
           world.add(marker);
         });
@@ -366,7 +406,7 @@ export function IndonesiaMap() {
           const baseColor = new THREE.Color(hovered.userData.baseColor ?? style.color);
           material.color.copy(baseColor).offsetHSL(0, .04, .1);
           material.emissive.copy(baseColor);
-          material.emissiveIntensity = .42;
+          material.emissiveIntensity = .2;
         }
         renderer.domElement.style.cursor = hovered ? "pointer" : "grab";
       }
