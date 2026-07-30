@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FALLBACK_STYLE, PROVINCE_STYLES, type ProvinceStyle } from "../provinceStyles";
 import { createProvinceMiniature } from "../provinceMiniatures";
-import { createTextileTexture, FALLBACK_TEXTILE, PROVINCE_TEXTILES } from "../provinceTextiles";
+import { createTextileTexture, FALLBACK_TEXTILE, PROVINCE_TEXTILES, PROVINCE_TEXTURE_KEYS } from "../provinceTextiles";
 import { getProvinceAnimalCredit, loadProvinceAnimal } from "../provinceAnimals";
 
 type Position = [number, number];
@@ -78,6 +78,7 @@ export function IndonesiaMap() {
   );
   const activeStyle = PROVINCE_STYLES[activeProvince] ?? FALLBACK_STYLE;
   const activeTextile = PROVINCE_TEXTILES[activeProvince] ?? FALLBACK_TEXTILE;
+  const activeTextureKey = PROVINCE_TEXTURE_KEYS[activeProvince] ?? "ikat";
   const activeAnimalCredit = getProvinceAnimalCredit(activeProvince);
 
   useEffect(() => {
@@ -164,7 +165,7 @@ export function IndonesiaMap() {
       if (!mesh) return;
       const material = mesh.material as THREE.MeshPhysicalMaterial;
       const style = (mesh.userData.style as ProvinceStyle) ?? FALLBACK_STYLE;
-      material.color.set(mesh === selected ? 0xfff0bf : 0xffffff);
+      material.color.set(mesh === selected ? style.accent : style.color);
       material.emissive.set(style.emissive);
       material.emissiveIntensity = mesh === selected ? 0.9 : 0.34;
       material.clearcoat = mesh === selected ? 0.8 : 0.35;
@@ -201,9 +202,8 @@ export function IndonesiaMap() {
           const textileTexture = createTextileTexture(textile, index, name);
           if (textileTexture) textures.push(textileTexture);
           const material = new THREE.MeshPhysicalMaterial({
-            color: 0xffffff,
-            map: textileTexture,
-            roughness: style.category === "Bahari" ? .38 : .7,
+            color: style.color,
+            roughness: style.category === "Bahari" ? .42 : .72,
             metalness: style.category === "Kota" ? .3 : .06,
             clearcoat: .35,
             emissive: style.emissive,
@@ -214,6 +214,23 @@ export function IndonesiaMap() {
           mesh.userData.style = style;
           world.add(mesh);
           meshes.push(mesh);
+          if (textileTexture) {
+            const textileTop = new THREE.Mesh(
+              new THREE.ShapeGeometry(featureRings(feature).map(makeShape)),
+              new THREE.MeshBasicMaterial({
+                color: 0xeaf1df,
+                map: textileTexture,
+                transparent: true,
+                opacity: .24,
+                depthWrite: false,
+                polygonOffset: true,
+                polygonOffsetFactor: -2,
+              }),
+            );
+            textileTop.geometry.rotateX(-Math.PI / 2);
+            textileTop.position.y = style.depth + .052;
+            world.add(textileTop);
+          }
           const center = featureCenter(feature);
           centers.set(name, center);
 
@@ -296,7 +313,7 @@ export function IndonesiaMap() {
         if (hovered && hovered !== selected) {
           const material = hovered.material as THREE.MeshPhysicalMaterial;
           const style = (hovered.userData.style as ProvinceStyle) ?? FALLBACK_STYLE;
-          material.color.set(0xffedb0);
+          material.color.set(style.accent);
           material.emissive.set(style.emissive);
           material.emissiveIntensity = .78;
         }
@@ -376,6 +393,13 @@ export function IndonesiaMap() {
           <span className="category-pill">{activeStyle.category}</span>
           <h2>{activeStyle.signature}</h2>
           <p>{activeStyle.detail}</p>
+        </div>
+        <div
+          className="fabric-sample"
+          style={{ backgroundImage: `linear-gradient(90deg,rgba(5,23,19,.08),rgba(5,23,19,.72)),url(/textures/library/${activeTextureKey}.jpg)` }}
+        >
+          <span>Tekstil daerah</span>
+          <b>{activeTextile.textile}</b>
         </div>
         <div className="identity-grid">
           <div><span>Busana adat</span><b>{activeTextile.attire}</b><small>{activeTextile.textile}</small></div>

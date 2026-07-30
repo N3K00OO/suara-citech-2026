@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 :root { --ink:#e9f3dd; --muted:#91a99b; --acid:#ddea68; --panel:rgba(6,26,22,.72); }
 * { box-sizing:border-box; }
@@ -93,10 +93,14 @@ h1 span { display:block; margin-top:18px; color:var(--acid); font-family:Georgia
 .identity-grid span { display:block; margin-bottom:4px; color:#6f887b; font-size:7px; letter-spacing:.12em; text-transform:uppercase; }
 .identity-grid b { display:block; overflow:hidden; color:#cfddd3; font-size:9px; font-weight:600; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }
 @media (max-width:900px) { .province-card { width:230px; bottom:118px; max-height:47dvh; } }
-@media (max-width:600px) { .province-card { right:10px; bottom:116px; width:184px; max-height:42dvh; padding:11px; } .signature-block { padding:8px 0; } .signature-block h2 { margin:6px 0 3px; font-size:14px; } .signature-block p { font-size:8px; } .identity-grid { gap:4px; margin:7px 0; } .identity-grid div { padding:6px; } .identity-grid b { font-size:8px; } }
+@media (max-width:600px) { .province-card { right:10px; bottom:116px; width:184px; max-height:54dvh; padding:11px; } .signature-block { padding:8px 0; } .signature-block h2 { margin:6px 0 3px; font-size:14px; } .signature-block p { font-size:8px; } .identity-grid { gap:4px; margin:7px 0; } .identity-grid div { padding:6px; } .identity-grid b { font-size:8px; } }
 
 .identity-grid small { display:block; margin-top:3px; overflow:hidden; color:#789084; font-size:7px; line-height:1.25; text-overflow:ellipsis; white-space:nowrap; }
 .asset-credit { border-color:color-mix(in srgb,var(--province-accent) 28%,transparent)!important; background:color-mix(in srgb,var(--province-accent) 7%,transparent)!important; }
 .map-footer a { margin-left:auto; color:#8ba497; text-decoration:none; transition:color 160ms ease; }
 .map-footer a:hover { color:var(--acid); }
 @media (max-width:900px) { .map-footer a { display:none; } }
+.fabric-sample { min-height:62px; margin:10px 0 0; padding:11px 12px; display:flex; flex-direction:column; justify-content:flex-end; border:1px solid color-mix(in srgb,var(--province-accent) 22%,transparent); background-position:center; background-size:cover; box-shadow:inset 0 -30px 36px rgba(4,18,15,.42); }
+.fabric-sample span { margin-bottom:3px; color:rgba(239,246,229,.68); font-size:7px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+.fabric-sample b { color:#f1f5e8; font-family:Georgia,serif; font-size:13px; font-style:italic; font-weight:400; }
+@media (max-width:600px) { .fabric-sample { min-height:48px; padding:8px; } }
