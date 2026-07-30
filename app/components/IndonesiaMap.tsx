@@ -138,7 +138,18 @@ export function IndonesiaMap() {
     let selected: THREE.Mesh | null = null;
     let targetCamera = camera.position.clone();
     let targetLookAt = controls.target.clone();
+    let cameraTransitionActive = false;
+    let pointerIsDown = false;
+    let dragged = false;
+    const dragStart = new THREE.Vector2();
     let disposed = false;
+    const onControlsStart = () => { cameraTransitionActive = false; };
+    const onControlsEnd = () => {
+      targetCamera.copy(camera.position);
+      targetLookAt.copy(controls.target);
+    };
+    controls.addEventListener("start", onControlsStart);
+    controls.addEventListener("end", onControlsEnd);
     const resetMaterial = (mesh: THREE.Mesh | null) => {
       if (!mesh) return;
       const material = mesh.material as THREE.MeshPhysicalMaterial;
@@ -160,6 +171,7 @@ export function IndonesiaMap() {
         const center = centers.get(name) || new THREE.Vector3();
         targetLookAt = center.clone();
         targetCamera = new THREE.Vector3(center.x, 7.5, center.z + 10.5);
+        cameraTransitionActive = true;
       }
     };
 
@@ -252,19 +264,34 @@ export function IndonesiaMap() {
       })
       .catch(() => undefined);
 
+    const onPointerDown = (event: PointerEvent) => {
+      pointerIsDown = true;
+      dragged = false;
+      dragStart.set(event.clientX, event.clientY);
+    };
     const onPointerMove = (event: PointerEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      const deltaX = event.clientX - dragStart.x;
+      const deltaY = event.clientY - dragStart.y;
+      if (pointerIsDown && deltaX * deltaX + deltaY * deltaY > 25) dragged = true;
     };
+    const onPointerUp = () => { pointerIsDown = false; };
     const onPointerLeave = () => {
+      pointerIsDown = false;
       pointer.set(20, 20);
       if (hovered && hovered !== selected) resetMaterial(hovered);
       hovered = null;
       renderer.domElement.style.cursor = "grab";
     };
-    const onClick = () => { if (hovered) selectProvince(hovered.userData.name); };
+    const onClick = () => {
+      if (!dragged && hovered) selectProvince(hovered.userData.name);
+      dragged = false;
+    };
+    renderer.domElement.addEventListener("pointerdown", onPointerDown);
     renderer.domElement.addEventListener("pointermove", onPointerMove);
+    renderer.domElement.addEventListener("pointerup", onPointerUp);
     renderer.domElement.addEventListener("pointerleave", onPointerLeave);
     renderer.domElement.addEventListener("click", onClick);
 
@@ -300,8 +327,13 @@ export function IndonesiaMap() {
         }
         renderer.domElement.style.cursor = hovered ? "pointer" : "grab";
       }
-      camera.position.lerp(targetCamera, 0.045);
-      controls.target.lerp(targetLookAt, 0.045);
+      if (cameraTransitionActive) {
+        camera.position.lerp(targetCamera, .045);
+        controls.target.lerp(targetLookAt, .045);
+        if (camera.position.distanceToSquared(targetCamera) < .0001 && controls.target.distanceToSquared(targetLookAt) < .0001) {
+          cameraTransitionActive = false;
+        }
+      }
       controls.update();
       renderer.render(scene, camera);
     };
@@ -317,7 +349,11 @@ export function IndonesiaMap() {
       disposed = true;
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", handleResize);
+      controls.removeEventListener("start", onControlsStart);
+      controls.removeEventListener("end", onControlsEnd);
+      renderer.domElement.removeEventListener("pointerdown", onPointerDown);
       renderer.domElement.removeEventListener("pointermove", onPointerMove);
+      renderer.domElement.removeEventListener("pointerup", onPointerUp);
       renderer.domElement.removeEventListener("pointerleave", onPointerLeave);
       renderer.domElement.removeEventListener("click", onClick);
       controls.dispose();
