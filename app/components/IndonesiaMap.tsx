@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FALLBACK_STYLE, PROVINCE_STYLES, type ProvinceStyle } from "../provinceStyles";
 import { createProvinceMiniature } from "../provinceMiniatures";
-import { createTextileTexture, FALLBACK_TEXTILE, PROVINCE_TEXTILES, PROVINCE_TEXTURE_KEYS } from "../provinceTextiles";
-import { getProvinceAnimalCredit, loadProvinceAnimal } from "../provinceAnimals";
+import { createTextileTexture } from "../provinceTextiles";
+import { loadProvinceAnimal } from "../provinceAnimals";
 
 type Position = [number, number];
 type ProvinceFeature = {
@@ -18,11 +18,6 @@ type ProvinceCollection = { features: ProvinceFeature[] };
 const CENTER = { lon: 118.2, lat: -2.4 };
 const SCALE = 0.5;
 const DEFAULT_PROVINCE = "DKI Jakarta";
-const presets = [
-  { label: "Nusantara", target: [0, 0, 0], camera: [0, 15, 21] },
-  { label: "Jawa", target: [-2.4, 0, 1.6], camera: [-2.4, 7, 10] },
-  { label: "Papua", target: [9.5, 0, -0.2], camera: [9.5, 8, 11] },
-];
 const cities = [
   [106.8456, -6.2088], [98.6722, 3.5952], [112.7521, -7.2575],
   [119.4327, -5.1477], [140.7181, -2.5916],
@@ -64,23 +59,6 @@ function featureCenter(feature: ProvinceFeature) {
 
 export function IndonesiaMap() {
   const mountRef = useRef<HTMLDivElement>(null);
-  const api = useRef<{
-    focus: (target: number[], camera: number[]) => void;
-    select: (name: string) => void;
-  } | null>(null);
-  const [provinceNames, setProvinceNames] = useState<string[]>([]);
-  const [activeProvince, setActiveProvince] = useState(DEFAULT_PROVINCE);
-  const [loading, setLoading] = useState(true);
-  const [muted, setMuted] = useState(false);
-  const activeIndex = useMemo(
-    () => Math.max(0, provinceNames.indexOf(activeProvince)),
-    [activeProvince, provinceNames],
-  );
-  const activeStyle = PROVINCE_STYLES[activeProvince] ?? FALLBACK_STYLE;
-  const activeTextile = PROVINCE_TEXTILES[activeProvince] ?? FALLBACK_TEXTILE;
-  const activeTextureKey = PROVINCE_TEXTURE_KEYS[activeProvince] ?? "papua";
-  const activeAnimalCredit = getProvinceAnimalCredit(activeProvince);
-
   useEffect(() => {
     if (!mountRef.current) return;
     const container = mountRef.current;
@@ -165,10 +143,12 @@ export function IndonesiaMap() {
       if (!mesh) return;
       const material = mesh.material as THREE.MeshPhysicalMaterial;
       const style = (mesh.userData.style as ProvinceStyle) ?? FALLBACK_STYLE;
-      material.color.set(mesh === selected ? style.accent : style.color);
-      material.emissive.set(style.emissive);
-      material.emissiveIntensity = mesh === selected ? 0.9 : 0.34;
-      material.clearcoat = mesh === selected ? 0.8 : 0.35;
+      const baseColor = new THREE.Color(mesh.userData.baseColor ?? style.color);
+      material.color.copy(baseColor);
+      if (mesh === selected) material.color.offsetHSL(0, .03, .1);
+      material.emissive.copy(baseColor);
+      material.emissiveIntensity = mesh === selected ? .46 : .18;
+      material.clearcoat = mesh === selected ? .8 : .35;
     };
     const selectProvince = (name: string, moveCamera = true) => {
       const mesh = meshes.find((item) => item.userData.name === name);
@@ -176,7 +156,6 @@ export function IndonesiaMap() {
       if (selected && selected !== mesh) resetMaterial(selected);
       selected = mesh;
       resetMaterial(selected);
-      setActiveProvince(name);
       if (moveCamera) {
         const center = centers.get(name) || new THREE.Vector3();
         targetLookAt = center.clone();
@@ -189,7 +168,6 @@ export function IndonesiaMap() {
       .then((data) => {
         if (disposed) return;
         const names = data.features.map((f) => f.properties.PROVINSI).sort((a, b) => a.localeCompare(b, "id"));
-        setProvinceNames(names);
         data.features.forEach((feature, index) => {
           const name = feature.properties.PROVINSI;
           const style = PROVINCE_STYLES[name] ?? FALLBACK_STYLE;
@@ -198,22 +176,25 @@ export function IndonesiaMap() {
             bevelThickness: 0.045, bevelSegments: 2, curveSegments: 2,
           });
           geometry.rotateX(-Math.PI / 2);
-          const textile = PROVINCE_TEXTILES[name] ?? FALLBACK_TEXTILE;
-          const textileTexture = createTextileTexture(textile, index, name);
-          if (textileTexture) textures.push(textileTexture);
           const material = new THREE.MeshPhysicalMaterial({
             color: style.color,
             roughness: style.category === "Bahari" ? .42 : .72,
             metalness: style.category === "Kota" ? .3 : .06,
             clearcoat: .35,
             emissive: style.emissive,
-            emissiveIntensity: .34,
+            emissiveIntensity: .18,
           });
           const mesh = new THREE.Mesh(geometry, material);
           mesh.userData.name = name;
           mesh.userData.style = style;
           world.add(mesh);
           meshes.push(mesh);
+          const textileTexture = createTextileTexture(name, (color) => {
+            if (disposed) return;
+            mesh.userData.baseColor = color.getHex();
+            resetMaterial(mesh);
+          });
+          textures.push(textileTexture);
           if (textileTexture) {
             const textileTop = new THREE.Mesh(
               new THREE.ShapeGeometry(featureRings(feature).map(makeShape)),
@@ -221,7 +202,7 @@ export function IndonesiaMap() {
                 color: 0xffffff,
                 map: textileTexture,
                 transparent: true,
-                opacity: .68,
+                opacity: .69,
                 depthWrite: false,
                 polygonOffset: true,
                 polygonOffsetFactor: -2,
@@ -268,9 +249,8 @@ export function IndonesiaMap() {
         });
         const initial = meshes.some((mesh) => mesh.userData.name === DEFAULT_PROVINCE) ? DEFAULT_PROVINCE : names[0];
         selectProvince(initial, false);
-        setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => undefined);
 
     const onPointerMove = (event: PointerEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
@@ -313,9 +293,10 @@ export function IndonesiaMap() {
         if (hovered && hovered !== selected) {
           const material = hovered.material as THREE.MeshPhysicalMaterial;
           const style = (hovered.userData.style as ProvinceStyle) ?? FALLBACK_STYLE;
-          material.color.set(style.accent);
-          material.emissive.set(style.emissive);
-          material.emissiveIntensity = .78;
+          const baseColor = new THREE.Color(hovered.userData.baseColor ?? style.color);
+          material.color.copy(baseColor).offsetHSL(0, .04, .1);
+          material.emissive.copy(baseColor);
+          material.emissiveIntensity = .42;
         }
         renderer.domElement.style.cursor = hovered ? "pointer" : "grab";
       }
@@ -332,13 +313,6 @@ export function IndonesiaMap() {
       renderer.setSize(container.clientWidth, container.clientHeight);
     };
     window.addEventListener("resize", handleResize);
-    api.current = {
-      focus: (target, nextCamera) => {
-        targetLookAt = new THREE.Vector3(target[0], target[1], target[2]);
-        targetCamera = new THREE.Vector3(nextCamera[0], nextCamera[1], nextCamera[2]);
-      },
-      select: (name) => selectProvince(name),
-    };
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
@@ -356,65 +330,6 @@ export function IndonesiaMap() {
   return (
     <section className="map-experience">
       <div className="map-stage" ref={mountRef} />
-      <div className="grain" aria-hidden="true" />
-      <header className="topbar">
-        <a className="brand" href="#" aria-label="Tanah Air, kembali ke tampilan utama">
-          <span className="brand-mark">TA</span><span>Tanah Air</span>
-        </a>
-        <div className="live-status"><span className="status-dot" />Peta nasional aktif</div>
-        <button className="icon-button" type="button" aria-label={muted ? "Aktifkan suara ambient" : "Matikan suara ambient"} onClick={() => setMuted((value) => !value)}>
-          {muted ? "Senyap" : "Ambient"}
-        </button>
-      </header>
-      <aside className="hero-panel">
-        <p className="eyebrow">05° LU — 11° LS</p>
-        <h1>Jelajahi<span>Nusantara</span></h1>
-        <p className="hero-copy">Setiap provinsi kini punya diorama hidup: rumah adat, bentang alam, budaya, dan cita rasa yang berbeda.</p>
-        <div className="hero-actions">
-          <button className="primary-button" type="button" onClick={() => api.current?.focus(presets[0].target, presets[0].camera)}>
-            Lihat seluruh kepulauan <span>?</span>
-          </button>
-          <span className="drag-hint">Seret untuk memutar</span>
-        </div>
-      </aside>
-      <nav className="island-nav" aria-label="Fokus wilayah peta">
-        {presets.map((preset, index) => (
-          <button type="button" key={preset.label} className={index === 0 ? "active" : ""} onClick={(event) => {
-            event.currentTarget.parentElement?.querySelectorAll("button").forEach((button) => button.classList.remove("active"));
-            event.currentTarget.classList.add("active");
-            api.current?.focus(preset.target, preset.camera);
-          }}><span>0{index + 1}</span>{preset.label}</button>
-        ))}
-      </nav>
-      <div className="province-card" style={{ "--province-accent": "#" + activeStyle.accent.toString(16).padStart(6, "0") } as React.CSSProperties}>
-        <div className="province-meta"><span>Provinsi terpilih</span><span>{String(activeIndex + 1).padStart(2, "0")} / 38</span></div>
-        <div className="province-heading"><span className="province-swatch" /><strong>{activeProvince}</strong></div>
-        <div className="signature-block">
-          <span className="category-pill">{activeStyle.category}</span>
-          <h2>{activeStyle.signature}</h2>
-          <p>{activeStyle.detail}</p>
-        </div>
-        <div
-          className="fabric-sample"
-          style={{ backgroundImage: `linear-gradient(90deg,rgba(5,23,19,.03),rgba(5,23,19,.42)),url(/textures/provinces/${activeTextureKey}.webp)` }}
-        >
-          <span>Tekstil daerah</span>
-          <b>{activeTextile.textile}</b>
-        </div>
-        <div className="identity-grid">
-          <div><span>Busana adat</span><b>{activeTextile.attire}</b><small>{activeTextile.textile}</small></div>
-          <div><span>Kuliner</span><b>{activeStyle.food}</b></div>
-          <div><span>Warisan</span><b>{activeStyle.culture}</b></div>
-          {activeAnimalCredit && <div className="asset-credit"><span>Fauna 3D</span><b>{activeAnimalCredit.label}</b><small>{activeAnimalCredit.license} · {activeAnimalCredit.creator}</small></div>}
-        </div>
-        <label htmlFor="province-select">Jelajahi provinsi lain</label>
-        <select id="province-select" value={activeProvince} onChange={(event) => api.current?.select(event.target.value)}>
-          {provinceNames.map((province) => <option value={province} key={province}>{province}</option>)}
-        </select>
-      </div>
-      <div className={loading ? "loading-state visible" : "loading-state"} aria-live="polite"><span />Membentuk kepulauan…</div>
-      <footer className="map-footer"><span>38 tekstur busana adat</span><span>Rumah • budaya • fauna berlisensi</span><a href="/asset-credits.txt" target="_blank" rel="noreferrer">Kredit aset</a></footer>
     </section>
   );
 }
-

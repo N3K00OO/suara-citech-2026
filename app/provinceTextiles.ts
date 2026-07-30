@@ -62,21 +62,38 @@ export const PROVINCE_TEXTURE_KEYS: Record<string, string> = {
   "Papua Pegunungan":"papua", "Papua Selatan":"papua"
 };
 
-export function createTextileTexture(t: ProvinceTextile, index: number, province: string) {
-  const canvas = document.createElement("canvas"); canvas.width = canvas.height = 128;
-  const c = canvas.getContext("2d"); if (!c) return null;
-  const [base, ink, hi] = t.palette; c.fillStyle = base; c.fillRect(0,0,128,128); c.lineCap="round"; c.lineJoin="round";
-  const diamond = (size:number) => { c.strokeStyle=ink; c.lineWidth=4; for(let y=-size;y<144;y+=size) for(let x=-size;x<144;x+=size){ c.beginPath(); c.moveTo(x,y+size/2); c.lineTo(x+size/2,y); c.lineTo(x+size,y+size/2); c.lineTo(x+size/2,y+size); c.closePath(); c.stroke(); } };
-  if(t.motif==="songket"||t.motif==="geometric"){
-    diamond(t.motif==="songket"?30:24); c.fillStyle=hi; for(let y=15;y<128;y+=30) for(let x=15;x<128;x+=30){c.beginPath();c.arc(x,y,3.5,0,Math.PI*2);c.fill();}
-  } else if(t.motif==="batik"||t.motif==="floral"){
-    c.strokeStyle=ink;c.lineWidth=3;for(let y=16;y<144;y+=32)for(let x=16;x<144;x+=32){for(let p=0;p<4;p++){c.save();c.translate(x,y);c.rotate(p*Math.PI/2);c.beginPath();c.ellipse(0,-7,5,10,0,0,Math.PI*2);c.stroke();c.restore();}c.fillStyle=hi;c.beginPath();c.arc(x,y,2.5,0,Math.PI*2);c.fill();}
-  } else if(t.motif==="ikat"||t.motif==="papua"){
-    c.strokeStyle=ink;c.lineWidth=t.motif==="ikat"?7:5;for(let y=10;y<140;y+=28){c.beginPath();for(let x=-10;x<145;x+=16)c.lineTo(x,y+((x/16)%2?10:-2));c.stroke();}c.fillStyle=hi;for(let y=16;y<128;y+=28)for(let x=8;x<128;x+=32){c.beginPath();c.arc(x,y,t.motif==="papua"?4:2.5,0,Math.PI*2);c.fill();}
-  } else if(t.motif==="plaid"){
-    c.globalAlpha=.72;c.fillStyle=ink;for(let n=0;n<128;n+=32){c.fillRect(n,0,9,128);c.fillRect(0,n,128,9);}c.globalAlpha=1;c.strokeStyle=hi;c.lineWidth=2;for(let n=16;n<128;n+=32){c.beginPath();c.moveTo(n,0);c.lineTo(n,128);c.stroke();c.beginPath();c.moveTo(0,n);c.lineTo(128,n);c.stroke();}
-  } else {
-    c.strokeStyle=ink;c.lineWidth=t.motif==="stripe"?9:3;for(let n=-32;n<160;n+=t.motif==="stripe"?24:12){c.beginPath();if(t.motif==="stripe"){c.moveTo(n,0);c.lineTo(n+42,128);}else{c.moveTo(n,0);c.lineTo(n,128);c.moveTo(0,n);c.lineTo(128,n);}c.stroke();}c.strokeStyle=hi;c.lineWidth=2;for(let n=6;n<128;n+=24){c.beginPath();c.moveTo(0,n);c.lineTo(128,n);c.stroke();}
-  }
-  const texture = new THREE.Texture(canvas); texture.needsUpdate=true; const key=PROVINCE_TEXTURE_KEYS[province]??"papua"; new THREE.ImageLoader().load(`/textures/provinces/${key}.webp`, image=>{texture.image=image;texture.needsUpdate=true;}); texture.colorSpace=THREE.SRGBColorSpace; texture.wrapS=texture.wrapT=THREE.RepeatWrapping; texture.repeat.set(.31+(index%3)*.028,.31+(index%2)*.025); texture.rotation=(index%4)*.035; texture.center.set(.5,.5); texture.anisotropy=4; return texture;
+export function createTextileTexture(province: string, onColor?: (color: THREE.Color) => void) {
+  const key = PROVINCE_TEXTURE_KEYS[province] ?? "papua";
+  const texture = new THREE.TextureLoader().load(`/textures/provinces/${key}.webp`, (loadedTexture) => {
+    if (!onColor) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 24;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return;
+    context.drawImage(loadedTexture.image, 0, 0, canvas.width, canvas.height);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let red = 0, green = 0, blue = 0, samples = 0;
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (pixels[index + 3] < 16) continue;
+      red += pixels[index];
+      green += pixels[index + 1];
+      blue += pixels[index + 2];
+      samples += 1;
+    }
+    if (!samples) return;
+    const color = new THREE.Color().setRGB(
+      red / samples / 255,
+      green / samples / 255,
+      blue / samples / 255,
+      THREE.SRGBColorSpace,
+    );
+    color.offsetHSL(0, 0, -.07);
+    onColor(color);
+  });
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(.34, .34);
+  texture.center.set(.5, .5);
+  texture.anisotropy = 8;
+  return texture;
 }
