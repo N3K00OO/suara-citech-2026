@@ -483,6 +483,10 @@ export function IndonesiaMap() {
         if (child.userData.provinceMiniature) {
           child.position.y = child.userData.baseY + Math.sin(elapsed * 1.2 + child.userData.offset) * .014;
           child.rotation.y = Math.sin(elapsed * .55 + child.userData.offset) * .08;
+          const towerPulse = 1 + Math.sin(elapsed * 3.1 + child.userData.offset) * .22;
+          child.traverse((node) => {
+            if (node.userData.towerBeacon) node.scale.setScalar(towerPulse);
+          });
         } else if (child.userData.offset !== undefined) {
           const pulse = 1 + Math.sin(elapsed * 2.2 + child.userData.offset) * .24;
           child.children[1]?.scale.setScalar(pulse);

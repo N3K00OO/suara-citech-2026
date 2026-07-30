@@ -6,7 +6,7 @@ export function createProvinceMiniature(style: ProvinceStyle) {
   const accent = new THREE.MeshStandardMaterial({ color: style.accent, emissive: style.emissive, emissiveIntensity: .4, roughness: .4, metalness: .16 });
   const body = new THREE.MeshStandardMaterial({ color: style.color, emissive: style.emissive, emissiveIntensity: .25, roughness: .7 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x17352d, roughness: .8 });
-  const add = (geometry: THREE.BufferGeometry, material = body, x = 0, y = 0, z = 0) => {
+  const add = (geometry: THREE.BufferGeometry, material: THREE.Material = body, x = 0, y = 0, z = 0) => {
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y, z);
     group.add(mesh);
@@ -109,6 +109,65 @@ export function createProvinceMiniature(style: ProvinceStyle) {
       const stone = add(new THREE.DodecahedronGeometry(.075 + i * .012, 0), i === 1 ? accent : body, x, y, z);
       stone.scale.y = 1.5;
     });
+  }
+
+  const towerModels = new Set(["house", "monument", "temple", "honai", "lake"]);
+  const crownModels = new Set(["coral", "islands"]);
+  if (towerModels.has(style.model) || crownModels.has(style.model)) {
+    const glow = new THREE.MeshBasicMaterial({
+      color: 0xffefbd,
+      transparent: true,
+      opacity: .96,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const shaftGlow = new THREE.MeshBasicMaterial({
+      color: 0xffc76a,
+      transparent: true,
+      opacity: .52,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const tower = new THREE.Group();
+    const crown = crownModels.has(style.model);
+    const towerX = crown ? .03 : .16;
+    const towerZ = crown ? -.02 : .08;
+
+    if (crown) {
+      add(new THREE.CylinderGeometry(.075, .095, .035, 18), dark, towerX, .09, towerZ);
+      [-.045, 0, .045].forEach((x, i) => {
+        const prong = add(new THREE.ConeGeometry(.018, .12 + i * .025, 6), glow, towerX + x, .18 + i * .012, towerZ);
+        prong.userData.towerBeacon = true;
+      });
+      tower.position.set(towerX, .29, towerZ);
+    } else {
+      add(new THREE.CylinderGeometry(.045, .062, .17, 10), body, towerX, .145, towerZ);
+      add(new THREE.ConeGeometry(.09, .13, 12), accent, towerX, .29, towerZ);
+      tower.position.set(towerX, .39, towerZ);
+    }
+
+    const beacon = new THREE.Mesh(new THREE.OctahedronGeometry(.032, 0), glow);
+    beacon.userData.towerBeacon = true;
+    const aura = new THREE.Mesh(
+      new THREE.SphereGeometry(.075, 12, 10),
+      new THREE.MeshBasicMaterial({
+        color: 0xffb84f,
+        transparent: true,
+        opacity: .13,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    );
+    aura.userData.towerBeacon = true;
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(.0035, .007, .48, 6), shaftGlow);
+    shaft.position.y = .27;
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(.012, 8, 8), glow);
+    tip.position.y = .52;
+    tower.add(beacon, aura, shaft, tip);
+    group.add(tower);
   }
 
   group.traverse((child) => {
