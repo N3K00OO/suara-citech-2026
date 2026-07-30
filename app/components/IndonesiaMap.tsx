@@ -25,6 +25,12 @@ const cities = [
   [106.8456, -6.2088], [98.6722, 3.5952], [112.7521, -7.2575],
   [119.4327, -5.1477], [140.7181, -2.5916],
 ] as Position[];
+const beacons: Position[] = [
+  ...cities,
+  [104.455, 0.9186], [106.1169, -2.1291], [109.3425, -0.0263],
+  [116.8312, -1.2379], [124.8421, 1.4748], [128.1814, -3.6954],
+  [123.607, -10.1772],
+];
 
 function project([lon, lat]: Position) {
   return { x: (lon - CENTER.lon) * SCALE, y: (lat - CENTER.lat) * SCALE };
@@ -355,21 +361,44 @@ export function IndonesiaMap() {
           edges.position.y = .006;
           world.add(edges);
         });
-        cities.forEach((city) => {
-          const p = project(city);
+        beacons.forEach((beacon, index) => {
+          const p = project(beacon);
           const marker = new THREE.Group();
           marker.position.set(p.x, 0.4, -p.y);
-          const core = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffd47b, toneMapped: false }));
-          const halo = new THREE.Mesh(new THREE.RingGeometry(0.13, 0.16, 28), new THREE.MeshBasicMaterial({ color: 0xffc762, transparent: true, opacity: 0.58, side: THREE.DoubleSide, toneMapped: false }));
-          const beam = new THREE.Mesh(
-            new THREE.CylinderGeometry(.009, .009, .78, 8),
-            new THREE.MeshBasicMaterial({ color: 0xffca69, transparent: true, opacity: .54, toneMapped: false }),
+          const base = new THREE.Mesh(
+            new THREE.CylinderGeometry(.11, .19, .16, 24),
+            new THREE.MeshStandardMaterial({ color: 0xb27a25, emissive: 0xff9f32, emissiveIntensity: .42, roughness: .48, metalness: .35 }),
           );
-          beam.position.y = .4;
-          const markerLight = new THREE.PointLight(0xffb854, 1.8, 2.6, 2);
-          markerLight.position.y = .18;
+          base.position.y = .08;
+          const core = new THREE.Mesh(
+            new THREE.OctahedronGeometry(.075, 0),
+            new THREE.MeshBasicMaterial({ color: 0xffe0a0, toneMapped: false }),
+          );
+          core.position.y = .24;
+          const halo = new THREE.Mesh(
+            new THREE.RingGeometry(.16, .21, 32),
+            new THREE.MeshBasicMaterial({ color: 0xffc762, transparent: true, opacity: .62, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
+          );
+          const beamGlow = new THREE.Mesh(
+            new THREE.CylinderGeometry(.035, .065, 1.24, 12),
+            new THREE.MeshBasicMaterial({ color: 0xffa941, transparent: true, opacity: .1, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
+          );
+          beamGlow.position.y = .82;
+          const beam = new THREE.Mesh(
+            new THREE.CylinderGeometry(.006, .016, 1.18, 8),
+            new THREE.MeshBasicMaterial({ color: 0xffd88a, transparent: true, opacity: .78, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
+          );
+          beam.position.y = .82;
+          const tip = new THREE.Mesh(
+            new THREE.SphereGeometry(.035, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0xffedbc, blending: THREE.AdditiveBlending, toneMapped: false }),
+          );
+          tip.position.y = 1.43;
+          const markerLight = new THREE.PointLight(0xffb854, index < cities.length ? 2.2 : 1.45, 2.8, 2);
+          markerLight.position.y = .28;
           halo.rotation.x = -Math.PI / 2;
-          marker.add(core, halo, beam, markerLight);
+          halo.position.y = .012;
+          marker.add(base, halo, core, beamGlow, beam, tip, markerLight);
           marker.userData.offset = Math.random() * Math.PI * 2;
           world.add(marker);
         });
@@ -457,6 +486,8 @@ export function IndonesiaMap() {
         } else if (child.userData.offset !== undefined) {
           const pulse = 1 + Math.sin(elapsed * 2.2 + child.userData.offset) * .24;
           child.children[1]?.scale.setScalar(pulse);
+          child.children[2]?.scale.setScalar(.9 + (pulse - 1) * .5);
+          child.children[5]?.scale.setScalar(.84 + (pulse - 1) * .7);
         }
       });
       raycaster.setFromCamera(pointer, camera);
