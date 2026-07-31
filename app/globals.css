@@ -1271,6 +1271,22 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
   inset: 0 0 0 25%;
   min-height: 0;
   overflow: visible;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, .08) 8%,
+    rgba(0, 0, 0, .34) 20%,
+    rgba(0, 0, 0, .78) 38%,
+    #000 56%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, .08) 8%,
+    rgba(0, 0, 0, .34) 20%,
+    rgba(0, 0, 0, .78) 38%,
+    #000 56%
+  );
   animation: hero-map-in 1400ms cubic-bezier(.16,.72,.24,1) 120ms both;
 }
 .hero-map::before {
@@ -1639,7 +1655,7 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 @media (max-width: 1180px) and (min-width: 901px) {
   .landing-hero-copy { width: 47%; }
   .landing-hero h1 { font-size: clamp(56px, 5.7vw, 76px); }
-  .hero-map { left: 31%; }
+  .hero-map { left: 22%; }
   .journey-strip { width: 42vw; }
   .impact-section { grid-template-columns: 43% 57%; }
   .twin-metrics { display: none; }
