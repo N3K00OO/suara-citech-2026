@@ -360,6 +360,74 @@ function DocumentStep({
   );
 }
 
+function EvidenceWorkbench() {
+  return (
+    <aside className="formal-evidence-workbench" aria-label="Papan bukti aksesibilitas dan perjalanan">
+      <div className="evidence-map-panel">
+        <header><b>Peta aksesibilitas</b><span>ID bukti: EV-01</span></header>
+        <svg viewBox="0 0 620 330" aria-hidden="true">
+          <path className="map-road" d="M12 74 C128 90 182 58 280 112 S442 176 610 128" />
+          <path className="map-road" d="M56 296 C164 222 192 186 280 112 S438 48 584 28" />
+          <path className="map-road thin" d="M92 18 C148 130 168 226 214 326" />
+          <path className="walk-route" d="M70 278 C148 228 191 188 255 154 C336 112 406 126 478 84" />
+          <path className="detour-route" d="M255 154 C320 206 380 248 512 274" />
+          <circle className="route-point" cx="70" cy="278" r="8" />
+          <circle className="route-point" cx="255" cy="154" r="8" />
+          <circle className="route-point danger" cx="478" cy="84" r="10" />
+          <circle className="route-point detour" cx="512" cy="274" r="8" />
+          <text x="82" y="272">Halte ASEAN</text>
+          <text x="272" y="146">Lift mati</text>
+          <text x="480" y="70">Akses ditutup</text>
+          <text x="520" y="294">Rute alternatif</text>
+        </svg>
+        <div className="map-key">
+          <span><i></i>Lift</span><span><i></i>Ramp</span><span><i></i>Guiding block</span><span><i></i>Titik tertutup</span>
+        </div>
+      </div>
+      <div className="incident-timeline">
+        <header><b>Linimasa kejadian</b><span>EV-01</span></header>
+        {[
+          ["17.05", "Tiba di halte"],
+          ["17.12", "Lift tidak berfungsi"],
+          ["17.18", "Ramp licin"],
+          ["17.26", "Ambil rute alternatif"],
+          ["17.42", "Tiba di tujuan"],
+        ].map(([time, note]) => <p key={time}><b>{time}</b><span>{note}</span></p>)}
+      </div>
+      <div className="ocr-card">
+        <header><b>Struk OCR</b><span>EV-02</span></header>
+        <dl>
+          <div><dt>Asal</dt><dd>Halte ASEAN</dd></div>
+          <div><dt>Tujuan</dt><dd>Koridor 1</dd></div>
+          <div><dt>Waktu</dt><dd>17.42</dd></div>
+          <div><dt>Jumlah</dt><dd>Rp7.500</dd></div>
+        </dl>
+        <strong>Tervalidasi</strong>
+      </div>
+      <div className="policy-evidence-card">
+        <header><b>Klausul kebijakan</b><span>Pasal 7</span></header>
+        <p>Fasilitas aksesibilitas wajib tersedia pada setiap simpul transportasi.</p>
+        <mark>lift, ramp, guiding block, informasi visual</mark>
+      </div>
+      <div className="audio-evidence">
+        <button type="button" aria-label="Putar catatan suara">▶</button>
+        <div><span>Audio catatan · EV-03</span><i></i></div>
+        <b>00:36</b>
+      </div>
+      <div className="route-delta">
+        <span>Rute normal<b>820 m</b><small>12 menit</small></span>
+        <span>Rute terdampak<b>1,25 km</b><small>30 menit</small></span>
+        <strong>+430 m · +18 menit</strong>
+      </div>
+      <div className="evidence-thumbnails">
+        <span><i className="thumb-location"></i><b>Foto lokasi</b></span>
+        <span><i className="thumb-receipt"></i><b>Struk perjalanan</b></span>
+        <span><i className="thumb-route"></i><b>Peta rute</b></span>
+      </div>
+    </aside>
+  );
+}
+
 function FormalStep({
   formal,
   saved,
@@ -386,10 +454,7 @@ function FormalStep({
         copy="Jawaban disusun sebagai tanggapan konsultasi yang dapat ditinjau, bukan sekadar komentar singkat."
       />
       <div className="formal-workspace">
-        <div className="formal-photo-crop" role="img" aria-label="Warga melintasi genangan di kawasan permukiman">
-          <img src="/design/flood-impact-raw.png" alt="" />
-          <span>Pengalaman lapangan · akses dan mobilitas</span>
-        </div>
+        <EvidenceWorkbench />
         <form className="formal-form" onSubmit={(event) => { event.preventDefault(); onSubmit(); }}>
           <div className="form-grid compact">
             <label>Rancangan kebijakan
@@ -500,6 +565,49 @@ function CommunityStep({ onContinue }: { onContinue: () => void }) {
   );
 }
 
+function PolicyTopology({ selected }: { selected: string[] }) {
+  const groups = [
+    ["Pedagang kecil", "8 masukan"],
+    ["Pekerja malam", "6 masukan"],
+    ["Komuter", "10 masukan"],
+    ["Warga setempat", "9 masukan"],
+    ["Instansi", "5 masukan"],
+    ["Aksesibilitas", "7 masukan"],
+  ];
+  return (
+    <div className="policy-topology">
+      <svg viewBox="0 0 760 510" aria-hidden="true">
+        {[
+          ["M380 255 C270 92 206 80 130 70", "consensus"],
+          ["M380 255 C464 92 548 84 630 70", "difference"],
+          ["M380 255 C582 204 626 212 700 245", "consensus"],
+          ["M380 255 C515 390 584 414 648 442", "difference"],
+          ["M380 255 C288 407 214 425 130 442", "minority"],
+          ["M380 255 C182 244 132 244 64 245", "minority"],
+        ].map(([path, kind], index) => <path key={index} className={kind} d={path} />)}
+      </svg>
+      <div className="topology-core">
+        <small>Fokus saat ini</small>
+        <b>{selected[0]}</b>
+        <p>{selected[2]}</p>
+      </div>
+      {groups.map(([name, count], index) => (
+        <div className={`topology-node node-${index + 1}`} key={name}>
+          <i>{String(index + 1).padStart(2, "0")}</i><span><b>{name}</b><small>{count}</small></span>
+        </div>
+      ))}
+      <div className="live-transcript">
+        <span>Transkrip langsung · 09:42</span>
+        <p><b>Pedagang kecil</b>Kenaikan biaya sewa di sekitar halte membutuhkan waktu lebih dari tiga bulan.</p>
+        <p><b>Aksesibilitas</b>Lift dan guiding block harus berfungsi penuh sebelum transisi berakhir.</p>
+      </div>
+      <div className="topology-legend">
+        <span><i></i>Titik temu</span><span><i></i>Perbedaan pandangan</span><span><i></i>Suara jarang terwakili</span>
+      </div>
+    </div>
+  );
+}
+
 function AssemblyStep({ issue, onSelect, onContinue }: { issue: string; onSelect: (value: string) => void; onContinue: () => void }) {
   const issues = [
     ["Akses disabilitas", "96 suara", "Izin akses perlu melekat pada pengguna, bukan kendaraan."],
@@ -524,11 +632,7 @@ function AssemblyStep({ issue, onSelect, onContinue }: { issue: string; onSelect
             </button>
           ))}
         </nav>
-        <div className="relationship-map" aria-hidden="true">
-          <i></i><i></i><i></i><i></i><i></i>
-          <span>Pekerja</span><span>UMKM</span><span>Akses</span><span>Warga</span><span>Instansi</span>
-          <b>{selected[0]}</b>
-        </div>
+        <PolicyTopology selected={selected} />
         <article className="issue-summary">
           <span>Titik temu terpilih</span>
           <h3>{selected[0]}</h3>

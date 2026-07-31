@@ -73,8 +73,8 @@ export function IndonesiaMap() {
     const container = mountRef.current;
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x061815, 0.028);
-    const camera = new THREE.PerspectiveCamera(34, container.clientWidth / container.clientHeight, 0.1, 100);
-    camera.position.set(0, 15, 21);
+    const camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.set(0, 13.4, 18.2);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
     renderer.setSize(container.clientWidth, container.clientHeight);

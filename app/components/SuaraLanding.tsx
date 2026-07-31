@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IndonesiaMap } from "./IndonesiaMap";
 import { SuaraHeader } from "./SuaraHeader";
 
@@ -58,6 +58,20 @@ export function SuaraLanding() {
   const activeResident = residents[resident];
   const activeAssembly = assemblyViews[assembly];
 
+  useEffect(() => {
+    const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("is-visible");
+        });
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
+    );
+    targets.forEach((target) => observer.observe(target));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="suara-site">
       <SuaraHeader active="home" />
@@ -86,7 +100,7 @@ export function SuaraLanding() {
             <div className="hero-map" aria-label="Peta 3D Nusantara">
               <IndonesiaMap />
               <div className="map-quote">
-                <span>Jejak suara aktif</span>
+                <span>“</span>
                 <strong>Satu kebijakan.<br />Banyak kehidupan.</strong>
               </div>
               <div className="map-legend" aria-hidden="true">
@@ -98,17 +112,14 @@ export function SuaraLanding() {
           </div>
 
           <ol className="journey-strip" aria-label="Tahapan perjalanan satu suara">
+            <li className="journey-label">Jejak satu suara</li>
             {["Dampak", "Masukan", "Musyawarah", "Pertimbangan", "Perubahan"].map((item, index) => (
               <li key={item}><b>{String(index + 1).padStart(2, "0")}</b><span>{item}</span></li>
             ))}
           </ol>
         </section>
 
-        <section id="perjalanan" className="story-section impact-section" aria-labelledby="impact-title">
-          <div className="story-photo blok-m-photo" role="img" aria-label="Blok M Hub pada malam hari">
-            <img src="/design/blok-m-hub-raw.png" alt="" />
-            <div className="photo-caption"><span>Blok M, Jakarta Selatan</span><b>Simulasi kebijakan rendah emisi</b></div>
-          </div>
+        <section id="perjalanan" className="story-section impact-section" aria-labelledby="impact-title" data-reveal>
           <div className="paper-card impact-card">
             <p className="kicker rust">01 · Dampak sehari-hari</p>
             <h2 id="impact-title">Sebuah kebijakan akan mengubah cara kawasan ini bergerak.</h2>
@@ -134,10 +145,11 @@ export function SuaraLanding() {
             <blockquote>“{activeResident.quote}”</blockquote>
             <p className="resident-fact">{activeResident.fact}</p>
           </div>
+          <UrbanPolicyTwin activeResident={resident} />
           <ChapterFooter number="01" label="Dampak sehari-hari" progress="01 / 05" />
         </section>
 
-        <section className="story-section formal-story" aria-labelledby="formal-title">
+        <section className="story-section formal-story" aria-labelledby="formal-title" data-reveal>
           <div className="evidence-board" aria-label="Pratinjau masukan formal">
             <div className="evidence-heading">
               <span>Catatan pengalaman · Blok M</span>
@@ -203,7 +215,7 @@ export function SuaraLanding() {
           <ChapterFooter number="02" label="Masukan formal" progress="02 / 05" />
         </section>
 
-        <section className="story-section assembly-section" aria-labelledby="assembly-title">
+        <section className="story-section assembly-section" aria-labelledby="assembly-title" data-reveal>
           <div className="paper-card assembly-copy">
             <p className="kicker rust">03 · Ruang musyawarah</p>
             <h2 id="assembly-title">Bukan mencari suara paling keras.</h2>
@@ -225,6 +237,14 @@ export function SuaraLanding() {
             </div>
           </div>
           <div className="assembly-visual">
+            <svg className="assembly-links" viewBox="0 0 700 660" aria-hidden="true">
+              <path className="consensus-link one" d="M350 330 C250 185 170 180 118 128" />
+              <path className="consensus-link two" d="M350 330 C440 176 520 184 586 132" />
+              <path className="consensus-link three" d="M350 330 C510 310 564 332 630 332" />
+              <path className="difference-link" d="M350 330 C468 450 526 486 584 548" />
+              <path className="minority-link" d="M350 330 C245 468 180 500 116 548" />
+              <path className="minority-link" d="M350 330 C190 324 142 336 82 332" />
+            </svg>
             <div className="roundtable" aria-hidden="true">
               {["UMKM", "Pekerja", "Komuter", "Akses", "Warga", "Instansi"].map((group, index) => (
                 <span key={group} style={{ "--seat": index } as React.CSSProperties}>{group}</span>
@@ -240,7 +260,7 @@ export function SuaraLanding() {
           <ChapterFooter number="03" label="Musyawarah" progress="03 / 05" />
         </section>
 
-        <section className="story-section decision-section" aria-labelledby="decision-title">
+        <section className="story-section decision-section" aria-labelledby="decision-title" data-reveal>
           <div className="decision-quote">
             <span>Catatan pertimbangan</span>
             <blockquote>“Kepercayaan muncul ketika alasan dapat diperiksa—termasuk ketika usulan ditolak.”</blockquote>
@@ -256,7 +276,7 @@ export function SuaraLanding() {
           <ChapterFooter number="04" label="Pertimbangan lembaga" progress="04 / 05" />
         </section>
 
-        <section className="story-section revision-section" aria-labelledby="revision-title">
+        <section className="story-section revision-section" aria-labelledby="revision-title" data-reveal>
           <div className="revision-heading">
             <p className="kicker">05 · Jejak perubahan</p>
             <h2 id="revision-title">Masukan tidak berakhir saat dikirim.</h2>
@@ -288,7 +308,7 @@ export function SuaraLanding() {
           <ChapterFooter number="05" label="Perubahan naskah" progress="05 / 05" />
         </section>
 
-        <section className="handoff-section" aria-labelledby="handoff-title">
+        <section className="handoff-section" aria-labelledby="handoff-title" data-reveal>
           <div>
             <p className="kicker rust">Pengantar selesai</p>
             <h2 id="handoff-title">Pahami rancangan.<br />Berikan masukan.<br />Periksa apa yang berubah.</h2>
@@ -308,6 +328,73 @@ export function SuaraLanding() {
         <span>Data, lembaga, dan hasil konsultasi bersifat simulasi.</span>
         <Link href="/consultations">Lihat semua konsultasi</Link>
       </footer>
+    </div>
+  );
+}
+
+function UrbanPolicyTwin({ activeResident }: { activeResident: number }) {
+  const active = residents[activeResident];
+  return (
+    <div className="urban-policy-twin" role="img" aria-label="Simulasi elemen digital kawasan Blok M dan rute warga terdampak">
+      <div className="twin-skyline" aria-hidden="true">
+        {Array.from({ length: 28 }, (_, index) => (
+          <i
+            key={index}
+            style={{
+              "--building-x": `${(index * 37) % 96}%`,
+              "--building-y": `${14 + ((index * 29) % 72)}%`,
+              "--building-w": `${28 + ((index * 17) % 54)}px`,
+              "--building-h": `${20 + ((index * 23) % 58)}px`,
+              "--building-delay": `${index * -0.11}s`,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
+      <svg className="twin-routes" viewBox="0 0 900 720" aria-hidden="true">
+        <defs>
+          <filter id="routeGlow">
+            <feGaussianBlur stdDeviation="7" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <linearGradient id="roadFade" x1="0" x2="1">
+            <stop offset="0" stopColor="#526276" stopOpacity=".18" />
+            <stop offset=".5" stopColor="#7d8b98" stopOpacity=".5" />
+            <stop offset="1" stopColor="#526276" stopOpacity=".12" />
+          </linearGradient>
+        </defs>
+        <path className="twin-road broad" d="M25 565 C180 498 292 478 412 375 C548 260 660 236 890 178" />
+        <path className="twin-road" d="M58 192 C230 222 310 286 412 375 C548 494 684 516 864 630" />
+        <path className="twin-road" d="M218 704 C268 575 333 470 412 375 C488 284 536 158 575 22" />
+        <path className="route-normal route-animate" d="M74 545 C168 500 265 500 332 432 C390 373 447 302 558 292 C658 283 696 238 779 186" />
+        <path className="route-impact route-animate" d="M74 545 C168 500 260 510 332 465 C424 408 490 442 565 488 C651 541 708 581 817 626" />
+        {[["74","545"],["332","432"],["558","292"],["779","186"]].map(([cx, cy]) => (
+          <circle key={`${cx}-${cy}`} className="normal-node" cx={cx} cy={cy} r="8" />
+        ))}
+        {[["332","465"],["565","488"],["817","626"]].map(([cx, cy]) => (
+          <circle key={`${cx}-${cy}`} className="impact-node" cx={cx} cy={cy} r="8" />
+        ))}
+      </svg>
+      <div className="twin-hub">
+        <span>Blok M Hub</span>
+        <b>MRT Blok M</b>
+      </div>
+      <div className="policy-chip twin-hours"><span>Jam operasional</span><b>05.00–22.00</b><small>Kecuali bus & layanan</small></div>
+      <div className="policy-chip twin-zone"><span>Zona bongkar muat</span><b>05.00–22.00</b></div>
+      <div className="policy-chip twin-closure"><span>Akses ditutup</span><b>05.00–22.00</b></div>
+      <div className={`resident-beacon beacon-${activeResident}`}>
+        <i>{active.name.slice(0, 1)}</i>
+        <span><b>{active.name}</b><small>{active.role}</small></span>
+      </div>
+      <div className="twin-metrics">
+        <span>Rute normal<b>820 m</b><small>±12 menit</small></span>
+        <span>Rute terdampak<b>1,25 km</b><small>±30 menit</small></span>
+        <span className="alert">Detour<b>+430 m</b><small>+18 menit</small></span>
+      </div>
+      <div className="twin-legend">
+        <span><i></i>Rute normal</span>
+        <span><i></i>Rute terdampak</span>
+        <span><i></i>Akses layanan</span>
+      </div>
     </div>
   );
 }
