@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { IndonesiaMap } from "./IndonesiaMap";
+import { DeliberationMap3D } from "./DeliberationMap3D";
 import { SuaraHeader } from "./SuaraHeader";
 
 const residents = [
@@ -238,8 +239,13 @@ export function SuaraLanding() {
                 </button>
               ))}
             </div>
+            <article className="assembly-copy-result" aria-live="polite">
+              <strong>{activeAssembly.value} lintas kelompok</strong>
+              <p>{activeAssembly.copy}</p>
+            </article>
           </div>
           <div className="assembly-visual">
+            <DeliberationMap3D activeView={assembly} />
             <svg className="assembly-links" viewBox="0 0 700 660" aria-hidden="true">
               <path className="consensus-link one" d="M350 330 C250 185 170 180 118 128" />
               <path className="consensus-link two" d="M350 330 C440 176 520 184 586 132" />
@@ -249,16 +255,40 @@ export function SuaraLanding() {
               <path className="minority-link" d="M350 330 C190 324 142 336 82 332" />
             </svg>
             <div className="roundtable" aria-hidden="true">
-              {["UMKM", "Pekerja", "Komuter", "Akses", "Warga", "Instansi"].map((group, index) => (
-                <span key={group} style={{ "--seat": index } as React.CSSProperties}>{group}</span>
+              {[
+                ["▦", "UMKM"],
+                ["◐", "Pekerja malam"],
+                ["▣", "Komuter"],
+                ["♿", "Aksesibilitas"],
+                ["●", "Warga"],
+                ["◆", "Instansi"],
+              ].map(([icon, group], index) => (
+                <span key={group} style={{ "--seat": index } as React.CSSProperties}>
+                  <i>{icon}</i><b>{group}</b>
+                </span>
               ))}
-              <strong>{activeAssembly.value}</strong>
+              <strong><small>Titik temu</small>{activeAssembly.value}<em>lintas kelompok</em></strong>
             </div>
-            <article className="assembly-result" aria-live="polite">
-              <span>{activeAssembly.label}</span>
-              <h3>{activeAssembly.headline}</h3>
-              <p>{activeAssembly.copy}</p>
-            </article>
+            <div className="assembly-callouts" aria-hidden="true">
+              <span className="callout-access"><small>Jam akses</small><b>05.00 – 22.00</b><em>Kecuali bus & layanan</em></span>
+              <span className="callout-route"><small>Rute normal</small><b>820 m</b><em>±12 menit</em></span>
+              <span className="callout-policy"><small>Pasal 4.2</small><b>Mobilitas esensial</b><em>dengan dampak terkendali</em></span>
+              <span className="callout-economy"><small>Dampak ekonomi</small><b>−23%</b><em>Pendapatan harian</em></span>
+              <span className="callout-pattern"><small>Pola pergerakan</small><b>21.00 – 23.00</b><em>Puncak malam</em></span>
+              <span className="callout-zone"><small>Aturan zona</small><b>05.00 – 22.00</b><em>Zona bongkar muat</em></span>
+              <span className="callout-review"><small>Evaluasi berkala</small><b>Setiap 3 bulan</b><em>indikator terukur</em></span>
+            </div>
+            <aside className="assembly-evidence-rail" aria-label="Bukti dan temuan musyawarah">
+              <header><b>Bukti &amp; temuan</b><span>4</span></header>
+              <article><i>01</i><small>Konsensus</small><b>72% lintas kelompok</b><p>Dukung transisi lebih panjang dengan evaluasi berkala.</p></article>
+              <article><i>02</i><small>Perbedaan</small><b>Jam mulai pembatasan</b><p>Usulan 05.00 dan 06.00 masih berbeda.</p></article>
+              <article><i>03</i><small>Suara jarang</small><b>Akses pejalan kaki</b><p>Dampaknya tinggi bagi kelompok rentan.</p></article>
+              <article><i>04</i><small>Data rute</small><b>Rute terdampak utama</b><p>1,25 km dengan tambahan ±30 menit.</p></article>
+              <div className="assembly-mini-map"><b>Peta musyawarah</b><span></span></div>
+            </aside>
+            <div className="assembly-legend" aria-hidden="true">
+              <span><i></i>Titik temu</span><span><i></i>Perbedaan</span><span><i></i>Suara jarang terlihat</span>
+            </div>
           </div>
           <ChapterFooter number="03" label="Musyawarah" progress="03 / 05" />
         </section>
