@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { SiteMotion } from "./components/SiteMotion";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,7 +37,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id">
-      <body>{children}</body>
+      <body>
+        <SiteMotion />
+        {children}
+      </body>
     </html>
   );
 }

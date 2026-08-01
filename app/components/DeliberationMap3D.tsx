@@ -25,7 +25,7 @@ export function DeliberationMap3D({ activeView }: DeliberationMap3DProps) {
     camera.position.set(0, 0.25, 10.5);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     mount.appendChild(renderer.domElement);
@@ -164,6 +164,7 @@ export function DeliberationMap3D({ activeView }: DeliberationMap3DProps) {
     let pointerX = 0;
     let pointerY = 0;
     let isVisible = true;
+    let isPageVisible = !document.hidden;
     let frame = 0;
     const onPointerMove = (event: PointerEvent) => {
       const bounds = mount.getBoundingClientRect();
@@ -174,8 +175,14 @@ export function DeliberationMap3D({ activeView }: DeliberationMap3DProps) {
 
     const observer = new IntersectionObserver(([entry]) => {
       isVisible = entry.isIntersecting;
+      syncAnimation();
     }, { threshold: 0.05 });
     observer.observe(mount);
+    const onVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+      syncAnimation();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     const resize = () => {
       const width = Math.max(mount.clientWidth, 1);
@@ -189,8 +196,9 @@ export function DeliberationMap3D({ activeView }: DeliberationMap3DProps) {
     resize();
 
     const animate = (time: number) => {
+      frame = 0;
+      if (!isVisible || !isPageVisible) return;
       frame = requestAnimationFrame(animate);
-      if (!isVisible) return;
       const seconds = time * 0.001;
       world.rotation.z += (pointerX * 0.035 - world.rotation.z) * 0.035;
       world.rotation.x += (-0.28 - pointerY * 0.025 - world.rotation.x) * 0.035;
@@ -203,12 +211,20 @@ export function DeliberationMap3D({ activeView }: DeliberationMap3DProps) {
       });
       renderer.render(scene, camera);
     };
-    frame = requestAnimationFrame(animate);
+    const syncAnimation = () => {
+      if (isVisible && isPageVisible && !frame) frame = requestAnimationFrame(animate);
+      if ((!isVisible || !isPageVisible) && frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+    syncAnimation();
 
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
       resizeObserver.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       mount.removeEventListener("pointermove", onPointerMove);
       scene.traverse((object) => {
         if (!(object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points)) return;

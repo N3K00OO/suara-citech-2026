@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050b13" />
+    <meta name="description" content="Peta mobilitas interaktif Blok M Hub" />
+    <title>Blok M — Live Mobility</title>
+    <script type="module" crossorigin src="./assets/index-WQjXVHu2.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B8VSZxLe.css">
+  </head>
+  <body>
+    <main id="app">
+      <canvas id="city"></canvas>
+      <div class="vignette"></div>
+      <div class="noise"></div>
+
+      <header class="topbar glass">
+        <a class="brand" href="#" aria-label="Blok M Mobility">
+          <span class="brand-mark"><i></i><i></i><i></i></span>
+          <span><b>BLOK M</b><small>LIVE MOBILITY</small></span>
+        </a>
+        <div class="live-status"><span></span> DATA LANGSUNG <b>21:48</b></div>
+        <button class="icon-button" id="resetView" aria-label="Atur ulang kamera">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6M5.1 15a8 8 0 0 0 13.4 2M18.9 9A8 8 0 0 0 5.5 7"/></svg>
+        </button>
+      </header>
+
+      <section class="hero-copy">
+        <div class="eyebrow"><span></span> JAKARTA SELATAN · INDONESIA</div>
+        <h1>Perjalanan kota,<br><em>terlihat jelas.</em></h1>
+        <p>Pantau akses Blok M, perubahan rute, dan posisi teman secara langsung.</p>
+      </section>
+
+      <div class="map-label hub-label">
+        <span class="mini">PUSAT TRANSIT</span>
+        <strong>BLOK M HUB</strong>
+        <i></i>
+      </div>
+      <div class="map-label street-label street-one">Jl. Sultan Hasanuddin</div>
+      <div class="map-label street-label street-two">Jl. Panglima Polim</div>
+
+      <aside class="alert-card glass">
+        <div class="alert-icon">!</div>
+        <div><span>PERUBAHAN AKSES</span><strong>Pintu selatan ditutup</strong><small>05.00 — 22.00 · layanan tetap berjalan</small></div>
+        <button aria-label="Tutup pemberitahuan">×</button>
+      </aside>
+
+      <aside class="route-panel glass">
+        <div class="panel-head">
+          <div><span>RUTE ANDA</span><h2>Menuju Blok M Hub</h2></div>
+          <button class="icon-button" id="collapsePanel" aria-label="Ciutkan panel">−</button>
+        </div>
+
+        <div class="route-tabs" role="tablist">
+          <button class="active" data-route="normal" role="tab"><i></i>Normal</button>
+          <button data-route="detour" role="tab"><i></i>Detour</button>
+        </div>
+
+        <div class="metric-grid">
+          <div><span>JARAK</span><strong id="distance">820<small> m</small></strong></div>
+          <div><span>ESTIMASI</span><strong id="duration">12<small> mnt</small></strong></div>
+        </div>
+
+        <div class="impact" id="impact">
+          <span><i></i> DAMPAK GANGGUAN</span>
+          <strong>+18 <small>menit</small></strong>
+          <p>Detour menambah 430 m melalui Jl. Panglima Polim.</p>
+        </div>
+
+        <div class="route-steps">
+          <div><i class="start-dot"></i><span><b>Lokasi Anda</b><small>Jl. Melawai Raya</small></span><em>0 mnt</em></div>
+          <div><i class="turn-icon">↗</i><span><b>Belok ke Hasanuddin</b><small>Ikuti jalur pejalan kaki</small></span><em>6 mnt</em></div>
+          <div><i class="end-dot"></i><span><b>Blok M Hub</b><small>Pintu timur · akses lift</small></span><em>12 mnt</em></div>
+        </div>
+
+        <button class="primary-action" id="startJourney">
+          <span>Mulai perjalanan</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </aside>
+
+      <div class="legend glass closed">
+        <button class="legend-toggle" aria-expanded="false"><span>LEGENDA PETA</span><i>+</i></button>
+        <div class="legend-body">
+          <div><i class="line normal"></i><span>Rute normal</span></div>
+          <div><i class="line detour"></i><span>Rute terdampak</span></div>
+          <div><i class="zone"></i><span>Zona terbatas</span></div>
+          <div><i class="lift">↕</i><span>Akses lift</span></div>
+        </div>
+      </div>
+
+      <div class="controls-hint glass"><span>DRAG</span> putar · <span>SCROLL</span> zoom</div>
+      <div class="toast" role="status" aria-live="polite"></div>
+    </main>
+  </body>
+</html>

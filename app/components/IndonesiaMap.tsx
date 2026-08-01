@@ -76,7 +76,9 @@ export function IndonesiaMap() {
     const camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 100);
     camera.position.set(0, 13.4, 18.2);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+    // A modest bump keeps the batik province textures crisp on dense screens
+    // while off-screen pausing contains GPU usage.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -108,7 +110,7 @@ export function IndonesiaMap() {
     const sun = new THREE.DirectionalLight(0xffcf82, 5.4);
     sun.position.set(-10, 18, 9);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.mapSize.set(1024, 1024);
     sun.shadow.camera.near = 1;
     sun.shadow.camera.far = 55;
     sun.shadow.camera.left = -25;
@@ -127,7 +129,9 @@ export function IndonesiaMap() {
 
     const ocean = new THREE.Mesh(
       new THREE.CircleGeometry(27, 96),
-      new THREE.MeshPhysicalMaterial({ color: 0x092d29, transparent: true, opacity: 0.82, roughness: 0.35, clearcoat: 0.7 }),
+      // The page already supplies the sea color. A visible full-frame plane
+      // exposed the rectangular WebGL boundary on narrow layouts.
+      new THREE.MeshPhysicalMaterial({ color: 0x092d29, transparent: true, opacity: 0, roughness: 0.35, clearcoat: 0.7 }),
     );
     ocean.rotation.x = -Math.PI / 2;
     ocean.position.y = -0.07;
@@ -468,7 +472,21 @@ export function IndonesiaMap() {
 
     const clock = new THREE.Clock();
     let frame = 0;
+    let isInViewport = true;
+    let isPageVisible = !document.hidden;
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      isInViewport = entry.isIntersecting;
+      syncAnimation();
+    }, { rootMargin: "0px", threshold: 0.01 });
+    const onVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+      syncAnimation();
+    };
+    visibilityObserver.observe(container);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     const animate = () => {
+      frame = 0;
+      if (!isInViewport || !isPageVisible) return;
       frame = requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
       dust.rotation.y = elapsed * 0.012;
@@ -519,7 +537,14 @@ export function IndonesiaMap() {
       controls.update();
       renderer.render(scene, camera);
     };
-    animate();
+    const syncAnimation = () => {
+      if (isInViewport && isPageVisible && !frame) frame = requestAnimationFrame(animate);
+      if ((!isInViewport || !isPageVisible) && frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+    syncAnimation();
 
     const handleResize = () => {
       camera.aspect = container.clientWidth / container.clientHeight;
@@ -531,6 +556,8 @@ export function IndonesiaMap() {
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
+      visibilityObserver.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("resize", handleResize);
       controls.removeEventListener("start", onControlsStart);
       controls.removeEventListener("end", onControlsEnd);

@@ -39,4 +39,8 @@ next-env.d.ts
 /dist/
 /.wrangler/
 /outputs/
+/output/
 /work/
+/tmp/
+**/__pycache__/
+*.pyc

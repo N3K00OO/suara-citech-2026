@@ -2,6 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import {
+  appendParticipation,
+  FORMAL_DRAFT_KEY,
+  FORMAL_SUBMISSION_KEY,
+  seedDemoParticipation,
+} from "../demoData";
 import { SuaraHeader } from "./SuaraHeader";
 
 const productSteps = [
@@ -85,6 +91,8 @@ const communityResponses = [
 ];
 
 type FormalState = {
+  receipt?: string;
+  submittedAt?: string;
   article: string;
   clause: string;
   changeType: string;
@@ -113,22 +121,26 @@ export function SuaraProduct() {
   const [assemblyIssue, setAssemblyIssue] = useState("Akses disabilitas");
 
   useEffect(() => {
-    const selected = Number(new URLSearchParams(window.location.search).get("step"));
-    if (Number.isInteger(selected) && selected >= 0 && selected < productSteps.length) setStep(selected);
-    try {
-      const stored = window.localStorage.getItem("suara-formal-draft");
-      if (stored) setFormal({ ...initialFormal, ...JSON.parse(stored) });
-      const submission = window.localStorage.getItem("suara-formal-submission");
-      if (submission) setReceipt(JSON.parse(submission).receipt ?? null);
-    } catch {
-      // Local persistence is optional.
-    }
+    const frame = window.requestAnimationFrame(() => {
+      const selected = Number(new URLSearchParams(window.location.search).get("step"));
+      if (Number.isInteger(selected) && selected >= 0 && selected < productSteps.length) setStep(selected);
+      try {
+        seedDemoParticipation();
+        const stored = window.localStorage.getItem(FORMAL_DRAFT_KEY);
+        if (stored) setFormal({ ...initialFormal, ...JSON.parse(stored) });
+        const submission = window.localStorage.getItem(FORMAL_SUBMISSION_KEY);
+        if (submission) setReceipt(JSON.parse(submission).receipt ?? null);
+      } catch {
+        // Local persistence is optional.
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
-        window.localStorage.setItem("suara-formal-draft", JSON.stringify(formal));
+        window.localStorage.setItem(FORMAL_DRAFT_KEY, JSON.stringify(formal));
         setSaved(`Draf disimpan ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`);
       } catch {
         setSaved("Draf tersimpan selama halaman ini terbuka");
@@ -157,11 +169,20 @@ export function SuaraProduct() {
   };
 
   const submitFormal = () => {
-    const newReceipt = `SUA-2026-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const newReceipt = formal.receipt ?? `SUA-2026-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     const record = { ...formal, receipt: newReceipt, submittedAt: new Date().toISOString() };
     try {
-      window.localStorage.setItem("suara-formal-submission", JSON.stringify(record));
-      window.localStorage.removeItem("suara-formal-draft");
+      window.localStorage.setItem(FORMAL_SUBMISSION_KEY, JSON.stringify(record));
+      appendParticipation({
+        receipt: newReceipt,
+        submittedAt: record.submittedAt,
+        title: "Perawatan fasilitas akses di simpul transportasi",
+        article: record.article,
+        proposal: record.proposal,
+        impact: record.impact,
+        status: "Terkirim",
+      });
+      window.localStorage.removeItem(FORMAL_DRAFT_KEY);
     } catch {
       // The receipt still works in memory.
     }
@@ -281,8 +302,44 @@ function OverviewStep({ onStart }: { onStart: () => void }) {
         </article>
         <div className="scope-board">
           <div className="scope-route" aria-hidden="true">
-            <i></i><i></i><i></i><i></i>
-            <span>MRT</span><span>Pasar</span><span>Terminal</span><span>Hunian</span>
+            <svg className="scope-network" viewBox="0 0 720 390" role="presentation">
+              <defs>
+                <filter id="scopeGlow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+                <linearGradient id="scopeRoute" x1="0" x2="1">
+                  <stop offset="0" stopColor="#49d8d0" />
+                  <stop offset="1" stopColor="#ddad52" />
+                </linearGradient>
+              </defs>
+              <g className="scope-blocks">
+                <path d="M34 52h120v64H34zM188 34h98v88h-98zM322 46h138v58H322zM500 34h176v84H500z" />
+                <path d="M44 252h142v82H44zM220 272h108v72H220zM496 260h180v82H496z" />
+              </g>
+              <g className="scope-streets">
+                <path d="M0 184H720M172 0v390M474 0v390" />
+                <path d="M0 238C170 208 270 210 720 168" />
+              </g>
+              <path className="scope-main-route" d="M72 202 C132 142 214 132 280 184 S404 270 494 224 S588 130 652 144" />
+              <path className="scope-service-route" d="M280 184 C330 116 410 98 494 126 S610 238 652 144" />
+              {[
+                [72, 202, "MRT", "Blok M"],
+                [280, 184, "PASAR", "Melawai"],
+                [494, 224, "TERMINAL", "Bus kota"],
+                [652, 144, "HUNIAN", "Kebayoran"],
+              ].map(([x, y, title, detail]) => (
+                <g className="scope-stop" transform={`translate(${x} ${y})`} key={String(title)}>
+                  <circle r="12" />
+                  <circle r="4" />
+                  <g className="scope-label" transform="translate(-48 -58)">
+                    <rect width="96" height="40" rx="4" />
+                    <text x="10" y="17">{title}</text>
+                    <text className="detail" x="10" y="31">{detail}</text>
+                  </g>
+                </g>
+              ))}
+            </svg>
           </div>
           <div className="scope-facts">
             <article><b>06.00–21.00</b><span>Jam awal yang diusulkan</span></article>
@@ -365,20 +422,33 @@ function EvidenceWorkbench() {
     <aside className="formal-evidence-workbench" aria-label="Papan bukti aksesibilitas dan perjalanan">
       <div className="evidence-map-panel">
         <header><b>Peta aksesibilitas</b><span>ID bukti: EV-01</span></header>
-        <svg viewBox="0 0 620 330" aria-hidden="true">
-          <path className="map-road" d="M12 74 C128 90 182 58 280 112 S442 176 610 128" />
-          <path className="map-road" d="M56 296 C164 222 192 186 280 112 S438 48 584 28" />
-          <path className="map-road thin" d="M92 18 C148 130 168 226 214 326" />
-          <path className="walk-route" d="M70 278 C148 228 191 188 255 154 C336 112 406 126 478 84" />
-          <path className="detour-route" d="M255 154 C320 206 380 248 512 274" />
-          <circle className="route-point" cx="70" cy="278" r="8" />
-          <circle className="route-point" cx="255" cy="154" r="8" />
-          <circle className="route-point danger" cx="478" cy="84" r="10" />
-          <circle className="route-point detour" cx="512" cy="274" r="8" />
-          <text x="82" y="272">Halte ASEAN</text>
-          <text x="272" y="146">Lift mati</text>
-          <text x="480" y="70">Akses ditutup</text>
-          <text x="520" y="294">Rute alternatif</text>
+        <svg viewBox="0 0 760 330" aria-hidden="true">
+          <g className="map-blocks">
+            <path d="M18 34h126v58H18zM184 22h134v76H184zM356 28h150v64H356zM548 20h188v82H548z" />
+            <path d="M24 236h160v72H24zM228 252h128v58H228zM538 236h190v72H538z" />
+          </g>
+          <g className="map-roads">
+            <path className="map-road" d="M0 122 C146 114 210 138 322 172 S550 198 760 140" />
+            <path className="map-road" d="M42 320 C166 252 226 220 322 172 S500 70 736 54" />
+            <path className="map-road thin" d="M160 0 C198 90 230 196 274 330" />
+          </g>
+          <path className="walk-route" d="M94 270 C172 226 238 188 322 158 C416 124 510 118 610 86" />
+          <path className="detour-route" d="M322 158 C396 210 472 246 630 270" />
+          {[
+            [94, 270, "route-point", "HALTE ASEAN", "Titik awal", -22, -58],
+            [322, 158, "route-point", "LIFT MATI", "Hambatan", -52, -58],
+            [610, 86, "route-point danger", "AKSES DITUTUP", "Tidak dapat dilalui", -72, -64],
+            [630, 270, "route-point detour", "RUTE ALTERNATIF", "+430 meter", -82, -58],
+          ].map(([x, y, klass, title, detail, lx, ly]) => (
+            <g className="evidence-stop" transform={`translate(${x} ${y})`} key={String(title)}>
+              <circle className={String(klass)} r="9" />
+              <g className="evidence-label" transform={`translate(${lx} ${ly})`}>
+                <rect width="126" height="42" rx="4" />
+                <text x="10" y="17">{title}</text>
+                <text className="detail" x="10" y="31">{detail}</text>
+              </g>
+            </g>
+          ))}
         </svg>
         <div className="map-key">
           <span><i></i>Lift</span><span><i></i>Ramp</span><span><i></i>Guiding block</span><span><i></i>Titik tertutup</span>

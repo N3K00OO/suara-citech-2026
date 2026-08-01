@@ -1,10 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { IndonesiaMap } from "./IndonesiaMap";
-import { DeliberationMap3D } from "./DeliberationMap3D";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { SuaraHeader } from "./SuaraHeader";
+
+const IndonesiaMap = lazy(() => import("./IndonesiaMap").then((module) => ({ default: module.IndonesiaMap })));
+const TitikTemuArtwork = lazy(() => import("./TitikTemuArtwork").then((module) => ({ default: module.TitikTemuArtwork })));
+
+function DeferredVisual({ children }: { children: ReactNode }) {
+  const boundaryRef = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const boundary = boundaryRef.current;
+    if (!boundary || ready) return;
+    if (!("IntersectionObserver" in window)) {
+      setReady(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setReady(true);
+      observer.disconnect();
+    }, { rootMargin: "450px 0px", threshold: 0.01 });
+    observer.observe(boundary);
+    return () => observer.disconnect();
+  }, [ready]);
+
+  return <div className="deferred-visual" ref={boundaryRef}>{ready ? children : null}</div>;
+}
 
 const residents = [
   {
@@ -101,7 +125,9 @@ export function SuaraLanding() {
             </div>
 
             <div className="hero-map" aria-label="Peta 3D Nusantara">
-              <IndonesiaMap />
+              <Suspense fallback={<div className="visual-loading-shell" aria-hidden="true" />}>
+                <IndonesiaMap />
+              </Suspense>
               <div className="map-quote">
                 <span>“</span>
                 <strong>Satu kebijakan.<br />Banyak kehidupan.</strong>
@@ -148,11 +174,11 @@ export function SuaraLanding() {
             <blockquote>“{activeResident.quote}”</blockquote>
             <p className="resident-fact">{activeResident.fact}</p>
           </div>
-          <UrbanPolicyTwin activeResident={resident} />
+          <UrbanPolicyTwin />
           <ChapterFooter number="01" label="Dampak sehari-hari" progress="01 / 05" />
         </section>
 
-        <section className="story-section formal-story" aria-labelledby="formal-title" data-reveal>
+        <section id="masukan" className="story-section formal-story" aria-labelledby="formal-title" data-reveal>
           <FormalEvidenceWall />
           <div className="evidence-board" aria-label="Pratinjau masukan formal">
             <div className="evidence-heading">
@@ -219,7 +245,7 @@ export function SuaraLanding() {
           <ChapterFooter number="02" label="Masukan formal" progress="02 / 05" />
         </section>
 
-        <section className="story-section assembly-section" aria-labelledby="assembly-title" data-reveal>
+        <section id="musyawarah" className="story-section assembly-section" aria-labelledby="assembly-title" data-reveal>
           <div className="paper-card assembly-copy">
             <p className="kicker rust">03 · Ruang musyawarah</p>
             <h2 id="assembly-title">Bukan mencari suara paling keras.</h2>
@@ -245,7 +271,11 @@ export function SuaraLanding() {
             </article>
           </div>
           <div className="assembly-visual">
-            <DeliberationMap3D activeView={assembly} />
+            <DeferredVisual>
+              <Suspense fallback={<div className="visual-loading-shell" aria-hidden="true" />}>
+                <TitikTemuArtwork activeView={assembly} />
+              </Suspense>
+            </DeferredVisual>
             <svg className="assembly-links" viewBox="0 0 700 660" aria-hidden="true">
               <path className="consensus-link one" d="M350 330 C250 185 170 180 118 128" />
               <path className="consensus-link two" d="M350 330 C440 176 520 184 586 132" />
@@ -267,7 +297,11 @@ export function SuaraLanding() {
                   <i>{icon}</i><b>{group}</b>
                 </span>
               ))}
-              <strong><small>Titik temu</small>{activeAssembly.value}<em>lintas kelompok</em></strong>
+              <strong>
+                <small>Titik temu</small>
+                <b className="roundtable-value">{activeAssembly.value}</b>
+                <em>lintas kelompok</em>
+              </strong>
             </div>
             <div className="assembly-callouts" aria-hidden="true">
               <span className="callout-access"><small>Jam akses</small><b>05.00 – 22.00</b><em>Kecuali bus & layanan</em></span>
@@ -293,7 +327,7 @@ export function SuaraLanding() {
           <ChapterFooter number="03" label="Musyawarah" progress="03 / 05" />
         </section>
 
-        <section className="story-section decision-section" aria-labelledby="decision-title" data-reveal>
+        <section id="pertimbangan" className="story-section decision-section" aria-labelledby="decision-title" data-reveal>
           <ConsiderationStoryboard />
           <div className="decision-quote">
             <span>Catatan pertimbangan</span>
@@ -310,7 +344,7 @@ export function SuaraLanding() {
           <ChapterFooter number="04" label="Pertimbangan lembaga" progress="04 / 05" />
         </section>
 
-        <section className="story-section revision-section" aria-labelledby="revision-title" data-reveal>
+        <section id="perubahan" className="story-section revision-section" aria-labelledby="revision-title" data-reveal>
           <RevisionStoryboard />
           <div className="revision-heading">
             <p className="kicker">05 · Jejak perubahan</p>
@@ -343,7 +377,7 @@ export function SuaraLanding() {
           <ChapterFooter number="05" label="Perubahan naskah" progress="05 / 05" />
         </section>
 
-        <section className="handoff-section" aria-labelledby="handoff-title" data-reveal>
+        <section id="lanjut" className="handoff-section" aria-labelledby="handoff-title" data-reveal>
           <div>
             <p className="kicker rust">Pengantar selesai</p>
             <h2 id="handoff-title">Pahami rancangan.<br />Berikan masukan.<br />Periksa apa yang berubah.</h2>
@@ -381,7 +415,7 @@ function FormalEvidenceWall() {
         <article className="evidence-paper evidence-photo">
           <span className="tape-label">Pengalaman</span>
           <div className="photo-window" aria-label="Halte Bundaran HI">
-            <img src="/design/formal-stage-reference.png" alt="" />
+            <img src="/design/formal-stage-reference.webp" alt="" loading="lazy" decoding="async" />
           </div>
           <p>Halte Bundaran HI<br />Akses kursi roda terhalang lantai naik tanpa ramp.</p>
           <small>14 Apr 2025 · 07:42 WIB</small>
@@ -573,10 +607,49 @@ function RevisionStoryboard() {
   );
 }
 
-function UrbanPolicyTwin({ activeResident }: { activeResident: number }) {
-  const active = residents[activeResident];
+function MobilityArtworkFrame() {
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const inViewportRef = useRef(true);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+
+    const publishState = (active: boolean) => {
+      frame.contentWindow?.postMessage({ type: "suara:render-active", active }, "*");
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      inViewportRef.current = entry.isIntersecting;
+      publishState(entry.isIntersecting && !document.hidden);
+    }, { rootMargin: "0px", threshold: 0.01 });
+    const onVisibilityChange = () => publishState(!document.hidden && inViewportRef.current);
+    const onLoad = () => publishState(!document.hidden && inViewportRef.current);
+
+    observer.observe(frame);
+    frame.addEventListener("load", onLoad);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      observer.disconnect();
+      frame.removeEventListener("load", onLoad);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+
+  return (
+    <iframe
+      ref={frameRef}
+      className="mobility-artwork-frame"
+      src="/artworks/blok-m-mobility/index.html"
+      title="Peta mobilitas 3D Blok M"
+      loading="lazy"
+    />
+  );
+}
+
+function UrbanPolicyTwin() {
   return (
     <div className="urban-policy-twin" role="img" aria-label="Simulasi elemen digital kawasan Blok M dan rute warga terdampak">
+      <MobilityArtworkFrame />
       <div className="twin-skyline" aria-hidden="true">
         {Array.from({ length: 28 }, (_, index) => (
           <i
@@ -618,23 +691,6 @@ function UrbanPolicyTwin({ activeResident }: { activeResident: number }) {
       <div className="twin-hub">
         <span>Blok M Hub</span>
         <b>MRT Blok M</b>
-      </div>
-      <div className="policy-chip twin-hours"><span>Jam operasional</span><b>05.00–22.00</b><small>Kecuali bus & layanan</small></div>
-      <div className="policy-chip twin-zone"><span>Zona bongkar muat</span><b>05.00–22.00</b></div>
-      <div className="policy-chip twin-closure"><span>Akses ditutup</span><b>05.00–22.00</b></div>
-      <div className={`resident-beacon beacon-${activeResident}`}>
-        <i>{active.name.slice(0, 1)}</i>
-        <span><b>{active.name}</b><small>{active.role}</small></span>
-      </div>
-      <div className="twin-metrics">
-        <span>Rute normal<b>820 m</b><small>±12 menit</small></span>
-        <span>Rute terdampak<b>1,25 km</b><small>±30 menit</small></span>
-        <span className="alert">Detour<b>+430 m</b><small>+18 menit</small></span>
-      </div>
-      <div className="twin-legend">
-        <span><i></i>Rute normal</span>
-        <span><i></i>Rute terdampak</span>
-        <span><i></i>Akses layanan</span>
       </div>
     </div>
   );
