@@ -80,7 +80,10 @@ export function ResponsesPage() {
       <main>
         <header className="responses-hero">
           <p className="kicker">Partisipasi saya</p>
-          <h1>Jejak yang tetap dapat diperiksa setelah Anda mengirim.</h1>
+          <h1>
+            <span>Jejak yang tetap dapat diperiksa</span>
+            <span>setelah Anda mengirim.</span>
+          </h1>
           <p>Lihat draf, bukti pengiriman, tanggapan lembaga, dan perubahan naskah dalam satu tempat.</p>
         </header>
 
