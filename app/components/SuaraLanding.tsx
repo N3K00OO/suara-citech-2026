@@ -312,13 +312,6 @@ export function SuaraLanding() {
               <span className="callout-zone"><small>Aturan zona</small><b>05.00 – 22.00</b><em>Zona bongkar muat</em></span>
               <span className="callout-review"><small>Evaluasi berkala</small><b>Setiap 3 bulan</b><em>indikator terukur</em></span>
             </div>
-            <aside className="assembly-evidence-rail" aria-label="Bukti dan temuan musyawarah">
-              <header><b>Bukti &amp; temuan</b><span>4</span></header>
-              <article><i>01</i><small>Konsensus</small><b>72% lintas kelompok</b><p>Dukung transisi lebih panjang dengan evaluasi berkala.</p></article>
-              <article><i>02</i><small>Perbedaan</small><b>Jam mulai pembatasan</b><p>Usulan 05.00 dan 06.00 masih berbeda.</p></article>
-              <article><i>03</i><small>Suara jarang</small><b>Akses pejalan kaki</b><p>Dampaknya tinggi bagi kelompok rentan.</p></article>
-              <article><i>04</i><small>Data rute</small><b>Rute terdampak utama</b><p>1,25 km dengan tambahan ±30 menit.</p></article>
-            </aside>
             <div className="assembly-legend" aria-hidden="true">
               <span><i></i>Titik temu</span><span><i></i>Perbedaan</span><span><i></i>Suara jarang terlihat</span>
             </div>
