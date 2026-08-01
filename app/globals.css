@@ -3134,13 +3134,13 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 .assembly-callouts small { color: #dca64b; font: 700 7px var(--ui-sans); letter-spacing: .08em; text-transform: uppercase; }
 .assembly-callouts b { color: #e5d6bd; font: 13px var(--display-serif); }
 .assembly-callouts em { color: rgba(229,214,189,.58); font: 7px/1.35 var(--ui-sans); font-style: normal; }
-.callout-access { top: 5%; left: 28%; transform: rotate(-6deg); }
-.callout-route { top: 0; left: 48%; }
-.callout-policy { top: 6%; left: 67%; transform: rotate(7deg); }
-.callout-economy { top: 22%; left: 7%; transform: rotate(4deg); }
-.callout-pattern { top: 24%; right: 2%; transform: rotate(-5deg); }
-.callout-zone { bottom: 19%; left: 5%; transform: rotate(3deg); }
-.callout-review { right: 7%; bottom: 20%; }
+.callout-access { top: 3%; left: 26%; transform: translateX(-50%); }
+.callout-route { top: 3%; left: 50%; transform: translateX(-50%); }
+.callout-policy { top: 3%; left: 74%; transform: translateX(-50%); }
+.callout-economy { top: 25%; left: 5%; }
+.callout-pattern { top: 25%; right: 5%; }
+.callout-zone { bottom: 16%; left: 5%; }
+.callout-review { right: 5%; bottom: 16%; }
 .assembly-legend {
   position: absolute;
   right: 3%;
