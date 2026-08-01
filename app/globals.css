@@ -3027,7 +3027,7 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 }
 .assembly-webgl {
   position: absolute;
-  inset: 8% 0;
+  inset: 8% 24% 8% 0;
   z-index: 2;
   filter: drop-shadow(0 0 16px var(--active-network,#efb94f));
   opacity: .92;
@@ -3036,7 +3036,7 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 .assembly-webgl canvas { display: block; width: 100%; height: 100%; }
 .titik-temu-artwork {
   position: absolute;
-  inset: 2% 0 1%;
+  inset: 2% 24% 1% 0;
   z-index: 2;
   overflow: hidden;
   filter: saturate(.86) brightness(.9);
@@ -3045,10 +3045,10 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 .titik-temu-artwork canvas { width: 100%; height: 100%; }
 .titik-temu-artwork .webgl-stage { position: absolute; inset: 0; }
 .titik-temu-artwork canvas { display: block; }
-.assembly-links { right: 0; z-index: 2; width: 100%; height: 100%; opacity: .24; }
+.assembly-links { right: 24%; z-index: 2; width: 76%; height: 100%; opacity: .24; }
 .roundtable {
-  top: 50%;
-  left: 50%;
+  top: 51%;
+  left: 37%;
   z-index: 5;
   width: 430px;
   height: 430px;
@@ -3118,7 +3118,7 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
   white-space: nowrap;
   text-shadow: 0 0 24px rgba(239,178,72,.28);
 }
-.assembly-callouts { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.assembly-callouts { position: absolute; inset: 0 24% 0 0; z-index: 4; pointer-events: none; }
 .assembly-callouts > span {
   position: absolute;
   display: grid;
@@ -3134,16 +3134,16 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 .assembly-callouts small { color: #dca64b; font: 700 7px var(--ui-sans); letter-spacing: .08em; text-transform: uppercase; }
 .assembly-callouts b { color: #e5d6bd; font: 13px var(--display-serif); }
 .assembly-callouts em { color: rgba(229,214,189,.58); font: 7px/1.35 var(--ui-sans); font-style: normal; }
-.callout-access { top: 3%; left: 26%; transform: translateX(-50%); }
-.callout-route { top: 3%; left: 50%; transform: translateX(-50%); }
-.callout-policy { top: 3%; left: 74%; transform: translateX(-50%); }
-.callout-economy { top: 25%; left: 5%; }
-.callout-pattern { top: 25%; right: 5%; }
-.callout-zone { bottom: 16%; left: 5%; }
-.callout-review { right: 5%; bottom: 16%; }
+.callout-access { top: 5%; left: 28%; transform: rotate(-6deg); }
+.callout-route { top: 3%; left: 48%; }
+.callout-policy { top: 6%; left: 67%; transform: rotate(7deg); }
+.callout-economy { top: 22%; left: 7%; transform: rotate(4deg); }
+.callout-pattern { top: 24%; right: 2%; transform: rotate(-5deg); }
+.callout-zone { bottom: 19%; left: 5%; transform: rotate(3deg); }
+.callout-review { right: 7%; bottom: 20%; }
 .assembly-legend {
   position: absolute;
-  right: 3%;
+  right: 28%;
   bottom: 4%;
   z-index: 7;
   display: flex;
@@ -3167,10 +3167,11 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
   .assembly-copy > p:not(.kicker) { font-size: 12px; }
   .assembly-controls button { padding-inline: 9px; font-size: 9px; }
   .assembly-copy-result strong { font-size: 25px; }
-  .roundtable { left: 50%; width: 340px; height: 340px; }
+  .roundtable { left: 34%; width: 340px; height: 340px; }
   .roundtable span { width: 92px; height: 66px; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(-218px) rotate(calc(-1 * var(--angle))); }
+  .assembly-callouts { right: 27%; }
   .assembly-callouts > span { width: 103px; padding: 8px; }
-  .assembly-legend { right: 3%; gap: 15px; padding-inline: 12px; }
+  .assembly-legend { right: 29%; gap: 15px; padding-inline: 12px; }
 }
 
 @media (max-width: 900px) {
@@ -3778,7 +3779,7 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 
   .assembly-section { padding-bottom: 60px; }
   .assembly-copy {
-    margin: 42px -12px 42px 2.4vw;
+    margin: 18px -12px 66px 2.4vw;
     padding: 25px 30px 24px;
   }
   .assembly-copy h2 { margin: 13px 0; font-size: clamp(42px, 2.7vw, 50px); }
