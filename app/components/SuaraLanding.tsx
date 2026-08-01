@@ -318,7 +318,6 @@ export function SuaraLanding() {
               <article><i>02</i><small>Perbedaan</small><b>Jam mulai pembatasan</b><p>Usulan 05.00 dan 06.00 masih berbeda.</p></article>
               <article><i>03</i><small>Suara jarang</small><b>Akses pejalan kaki</b><p>Dampaknya tinggi bagi kelompok rentan.</p></article>
               <article><i>04</i><small>Data rute</small><b>Rute terdampak utama</b><p>1,25 km dengan tambahan ±30 menit.</p></article>
-              <div className="assembly-mini-map"><b>Peta musyawarah</b><span></span></div>
             </aside>
             <div className="assembly-legend" aria-hidden="true">
               <span><i></i>Titik temu</span><span><i></i>Perbedaan</span><span><i></i>Suara jarang terlihat</span>

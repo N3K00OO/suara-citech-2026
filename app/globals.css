@@ -2984,7 +2984,7 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 .assembly-copy > p:not(.kicker) { max-width: 480px; color: #4e4238; font-size: 15px; line-height: 1.55; }
 .assembly-controls {
   display: grid;
-  grid-template-columns: auto auto 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 30px;
   border: 0;
 }
@@ -3148,33 +3148,43 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
   bottom: 7%;
   z-index: 8;
   display: grid;
-  grid-template-rows: auto repeat(4,1fr) 130px;
+  grid-template-rows: auto repeat(4, 1fr);
+  gap: 8px;
   width: 22%;
   min-width: 188px;
   padding: 12px;
   border: 1px solid rgba(215,166,75,.32);
   border-radius: 8px;
-  background: rgba(5,18,27,.93);
+  background: rgba(5,18,27,.88);
   box-shadow: 0 20px 55px rgba(0,0,0,.35);
 }
-.assembly-evidence-rail header { display: flex; justify-content: space-between; padding: 4px 5px 12px; color: #ddc89f; font: 700 10px var(--ui-sans); text-transform: uppercase; }
+.assembly-evidence-rail header { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 5px; color: #ddc89f; font: 700 10px var(--ui-sans); text-transform: uppercase; }
 .assembly-evidence-rail header span { display: grid; width: 22px; height: 22px; place-items: center; border: 1px solid rgba(215,166,75,.4); border-radius: 50%; }
-.assembly-evidence-rail article { position: relative; display: grid; align-content: start; gap: 6px; padding: 12px 8px 10px 35px; border: 1px solid rgba(215,166,75,.18); border-radius: 5px; }
+.assembly-evidence-rail article {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 13px 10px 11px 38px;
+  overflow: hidden;
+  border: 1px solid rgba(215,166,75,.28);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(18,49,62,.76), rgba(5,22,33,.94) 70%);
+  box-shadow: inset 3px 0 0 rgba(215,166,75,.32), 0 7px 18px rgba(0,0,0,.16);
+}
+.assembly-evidence-rail article::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 42%;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(215,166,75,.48));
+}
 .assembly-evidence-rail article i { position: absolute; top: 12px; left: 9px; color: #dca64b; font: 700 10px var(--ui-sans); font-style: normal; }
 .assembly-evidence-rail article small { width: max-content; padding: 2px 5px; color: #dca64b; border: 1px solid currentColor; font: 700 7px var(--ui-sans); text-transform: uppercase; }
 .assembly-evidence-rail article b { color: #e4d5bb; font: 12px/1.2 var(--display-serif); }
 .assembly-evidence-rail article p { margin: 0; color: rgba(228,213,187,.65); font: 8px/1.35 var(--ui-sans); }
-.assembly-mini-map { position: relative; margin-top: 10px; padding: 12px; border: 1px solid rgba(215,166,75,.24); border-radius: 5px; overflow: hidden; }
-.assembly-mini-map b { color: #d5bd90; font: 700 8px var(--ui-sans); text-transform: uppercase; }
-.assembly-mini-map span {
-  position: absolute;
-  inset: 35px 14px 14px;
-  background:
-    radial-gradient(circle at 50% 50%,#edb74b 0 4px,transparent 5px),
-    radial-gradient(circle,#54c9bd 0 2px,transparent 3px) 0 0/31px 25px,
-    linear-gradient(28deg,transparent 48%,rgba(229,177,76,.5) 49% 51%,transparent 52%),
-    linear-gradient(-32deg,transparent 48%,rgba(84,201,189,.38) 49% 51%,transparent 52%);
-}
 .assembly-legend {
   position: absolute;
   right: 28%;
@@ -3219,7 +3229,6 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
   .roundtable { top: 43%; left: 50%; }
   .assembly-evidence-rail { top: auto; right: 3%; bottom: 7%; left: 3%; grid-template-columns: repeat(4,1fr); grid-template-rows: auto 1fr; width: auto; min-width: 0; height: 230px; }
   .assembly-evidence-rail header { grid-column: 1 / -1; }
-  .assembly-evidence-rail .assembly-mini-map { display: none; }
   .assembly-legend { right: 3%; bottom: 1.5%; left: 3%; justify-content: center; }
 }
 
@@ -3868,7 +3877,6 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
   .assembly-evidence-rail article i { top: 8px; left: 8px; }
   .assembly-evidence-rail article b { font-size: 10px; }
   .assembly-evidence-rail article p { font-size: 7px; }
-  .assembly-mini-map { display: none; }
   .assembly-legend { bottom: 2%; padding: 8px 14px; }
   .assembly-section .chapter-footer { bottom: 10px; }
 }
