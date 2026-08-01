@@ -241,33 +241,12 @@ html.route-is-whipping-in .responses-page {
   text-transform: uppercase;
 }
 .suara-mark {
-  position: relative;
-  display: grid;
-  width: 37px;
-  height: 37px;
-  place-items: center;
-  border: 2px solid var(--gold);
-  transform: rotate(45deg);
-}
-.suara-mark::before,
-.suara-mark::after {
-  position: absolute;
-  content: "";
-  border: 1px solid rgba(200, 154, 72, 0.6);
-  inset: 5px;
-}
-.suara-mark::after {
-  inset: 11px;
-  background: var(--gold);
-}
-.suara-mark i {
-  z-index: 1;
-  color: #101319;
-  font-family: Georgia, serif;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 700;
-  transform: rotate(-45deg);
+  display: block;
+  flex: 0 0 auto;
+  width: 39px;
+  height: 39px;
+  border-radius: 4px;
+  background: url("/suara-mark.svg") center / cover no-repeat;
 }
 .prototype-note {
   margin: 0;

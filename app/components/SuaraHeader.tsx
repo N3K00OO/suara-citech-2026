@@ -28,7 +28,7 @@ export function SuaraHeader({ active = "home", dark = true }: SuaraHeaderProps) 
   return (
     <header className={`suara-header ${dark ? "is-dark" : "is-light"}`}>
       <Link className="suara-brand" href="/" aria-label="SUARA, kembali ke beranda">
-        <span className="suara-mark" aria-hidden="true"><i>S</i></span>
+        <span className="suara-mark" aria-hidden="true" />
         <span>
           <strong>SUARA</strong>
           <small>Catatan kebijakan publik</small>

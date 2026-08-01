@@ -17,6 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description:
       "Ikuti pengalaman warga menjadi masukan formal, pertimbangan lembaga, dan perubahan kebijakan yang dapat diperiksa.",
+    icons: {
+      icon: [{ url: "/suara-icon.png", type: "image/png", sizes: "512x512" }],
+      shortcut: "/suara-icon.png",
+      apple: [{ url: "/suara-icon.png", sizes: "512x512", type: "image/png" }],
+    },
     openGraph: {
       title: "SUARA — Ikuti satu suara sampai kebijakan berubah",
       description:
