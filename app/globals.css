@@ -3245,8 +3245,8 @@ h1, h2, h3, blockquote { font-family: var(--display-serif); }
 
   .titik-temu-artwork {
     /* Keep the artwork full-bleed, but place its mathematical origin at the
-       same 37% anchor as the TITIK TEMU title disc and SVG route layer. */
-    inset: -4% -17% -4% -43%;
+       same 47% anchor as the TITIK TEMU title disc and SVG route layer. */
+    inset: -4% -27% -4% -33%;
     opacity: .96;
     filter: saturate(.82) brightness(.88) contrast(.92);
   }
